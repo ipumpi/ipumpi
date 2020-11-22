@@ -5,6 +5,8 @@
 //  Created by Dave Scruton on 11/17/20.
 //  Copyright © 2020 lpumpi. All rights reserved.
 //
+//  LINKS
+//   https://stackoverflow.com/questions/27216003/working-with-bluetooth-in-objective-c
 
 #import "ViewController.h"
 
