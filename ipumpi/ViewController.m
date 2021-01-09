@@ -45,6 +45,14 @@
 //==========MainVC=========================================================================
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    
+    
+    if ([PFUser currentUser] != nil && (PFUser.currentUser.objectId != nil)) //Logged in?
+        NSLog(@" logged into parse...");
+    else
+        NSLog(@" NOT logged into parse...");
+
     // Do any additional setup after loading the view.
 }
 
@@ -118,5 +126,38 @@
 } //end saveToParse
 
 
+
+- (IBAction)loginSelect:(id)sender {
+    loginVCMode = PL_SIGNUP_MODE;
+    [self performSegueWithIdentifier:@"loginSegue" sender:@"mainVC"];
+
+}
+
+- (IBAction)avatarSelect:(id)sender {
+    loginVCMode = PL_AVATAR_MODE;
+    if ([PFUser currentUser] != nil && (PFUser.currentUser.objectId != nil)) //Logged in?
+        [self performSegueWithIdentifier:@"loginSegue" sender:@"mainVC"];
+    else
+        NSLog(@" NOT logged into parse...");
+
+}
+
+
+
+
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    
+    //NSLog(@" prepareForSegue: %@ sender %@",[segue identifier], sender);
+    if([[segue identifier] isEqualToString:@"loginSegue"])
+    {
+        //Make sure we handle delegate returns!!
+        LoginViewController *vc = (LoginViewController*)[segue destinationViewController];
+        NSLog(@" prep4segue: loginVCMode %@",loginVCMode);
+
+        vc.entryMode = loginVCMode;
+    }
+   
+} //end prepareForSegue
 
 @end

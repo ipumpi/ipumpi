@@ -36,12 +36,37 @@
                                     <constraint firstAttribute="height" constant="150" id="syT-pb-SjU"/>
                                 </constraints>
                             </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pWi-Rc-phr">
+                                <rect key="frame" x="47" y="293" width="320" height="320"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="320" id="Lr0-M0-vSJ"/>
+                                    <constraint firstAttribute="width" constant="320" id="PGh-kP-o5t"/>
+                                </constraints>
+                            </view>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="avatar01.png" translatesAutoresizingMaskIntoConstraints="NO" id="xj6-eh-Ij1">
+                                <rect key="frame" x="143" y="389" width="128" height="128"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ipumpiRing.png" translatesAutoresizingMaskIntoConstraints="NO" id="V7t-8C-EF2">
+                                <rect key="frame" x="-48.5" y="197" width="511" height="512"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="511" id="2x0-o5-HC3"/>
+                                    <constraint firstAttribute="height" constant="512" id="cbo-Gl-aCm"/>
+                                </constraints>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBlueColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="xj6-eh-Ij1" firstAttribute="centerY" secondItem="V7t-8C-EF2" secondAttribute="centerY" id="5GD-RZ-K1w"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="X9O-Rc-exM" secondAttribute="trailing" id="8Fc-yV-Es3"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="top" secondItem="X9O-Rc-exM" secondAttribute="top" constant="44" id="EQQ-pv-Ozt"/>
+                            <constraint firstItem="V7t-8C-EF2" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="Juj-6n-cSq"/>
                             <constraint firstItem="X9O-Rc-exM" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="KfJ-dp-ogG"/>
+                            <constraint firstItem="xj6-eh-Ij1" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="PMs-dq-Xfu"/>
+                            <constraint firstItem="xj6-eh-Ij1" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="TKC-xE-L99"/>
+                            <constraint firstItem="pWi-Rc-phr" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="jiK-Vb-BLG"/>
+                            <constraint firstItem="V7t-8C-EF2" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="qHZ-TK-kDt"/>
+                            <constraint firstItem="pWi-Rc-phr" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="v2l-vj-2Fn"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
@@ -51,4 +76,8 @@
             <point key="canvasLocation" x="52.173913043478265" y="375"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="avatar01.png" width="96" height="96"/>
+        <image name="ipumpiRing.png" width="914" height="914"/>
+    </resources>
 </document>

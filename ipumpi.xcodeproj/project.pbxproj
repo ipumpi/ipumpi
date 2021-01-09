@@ -17,6 +17,19 @@
 		725A338A256655160074092E /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 725A3389256655160074092E /* UIKit.framework */; };
 		725A3393256657920074092E /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 725A3392256657920074092E /* Reachability.m */; };
 		725A3395256657BA0074092E /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 725A3394256657BA0074092E /* AudioToolbox.framework */; };
+		7270298C25A7D707008923B3 /* emptyUser.png in Resources */ = {isa = PBXBuildFile; fileRef = 7270298B25A7D707008923B3 /* emptyUser.png */; };
+		7270298E25A82F5D008923B3 /* test1.png in Resources */ = {isa = PBXBuildFile; fileRef = 7270298D25A82F5C008923B3 /* test1.png */; };
+		7270299025A91366008923B3 /* ipumpiRing.png in Resources */ = {isa = PBXBuildFile; fileRef = 7270298F25A91366008923B3 /* ipumpiRing.png */; };
+		72810E1F25A652EF0051E90E /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 72810E1E25A652EF0051E90E /* LoginViewController.m */; };
+		72810E2225A6538F0051E90E /* spinnerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 72810E2125A6538F0051E90E /* spinnerView.m */; };
+		72810E2525A653D40051E90E /* UIImageExtras.m in Sources */ = {isa = PBXBuildFile; fileRef = 72810E2425A653D40051E90E /* UIImageExtras.m */; };
+		72810E2B25A654D80051E90E /* icon128.png in Resources */ = {isa = PBXBuildFile; fileRef = 72810E2A25A654D80051E90E /* icon128.png */; };
+		72810E3425A65E4B0051E90E /* avatar02.png in Resources */ = {isa = PBXBuildFile; fileRef = 72810E2E25A65E4A0051E90E /* avatar02.png */; };
+		72810E3525A65E4B0051E90E /* avatar00.png in Resources */ = {isa = PBXBuildFile; fileRef = 72810E2F25A65E4A0051E90E /* avatar00.png */; };
+		72810E3625A65E4B0051E90E /* avatar05.png in Resources */ = {isa = PBXBuildFile; fileRef = 72810E3025A65E4A0051E90E /* avatar05.png */; };
+		72810E3825A65E4B0051E90E /* avatar01.png in Resources */ = {isa = PBXBuildFile; fileRef = 72810E3225A65E4B0051E90E /* avatar01.png */; };
+		72810E3925A65E4B0051E90E /* avatar03.png in Resources */ = {isa = PBXBuildFile; fileRef = 72810E3325A65E4B0051E90E /* avatar03.png */; };
+		72810E3B25A65F0B0051E90E /* avatar04.png in Resources */ = {isa = PBXBuildFile; fileRef = 72810E3A25A65F0A0051E90E /* avatar04.png */; };
 		72F3B26225664E1300562343 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 72F3B26125664E1300562343 /* AppDelegate.m */; };
 		72F3B26525664E1300562343 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 72F3B26425664E1300562343 /* SceneDelegate.m */; };
 		72F3B26825664E1300562343 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 72F3B26725664E1300562343 /* ViewController.m */; };
@@ -42,6 +55,22 @@
 		725A3391256657920074092E /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Reachability.h; path = ../../pix/pix/Reachability/Reachability.h; sourceTree = "<group>"; };
 		725A3392256657920074092E /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Reachability.m; path = ../../pix/pix/Reachability/Reachability.m; sourceTree = "<group>"; };
 		725A3394256657BA0074092E /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		7270298B25A7D707008923B3 /* emptyUser.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = emptyUser.png; sourceTree = "<group>"; };
+		7270298D25A82F5C008923B3 /* test1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test1.png; sourceTree = "<group>"; };
+		7270298F25A91366008923B3 /* ipumpiRing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ipumpiRing.png; sourceTree = "<group>"; };
+		72810E1D25A652EE0051E90E /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
+		72810E1E25A652EF0051E90E /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
+		72810E2025A6538F0051E90E /* spinnerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = spinnerView.h; sourceTree = "<group>"; };
+		72810E2125A6538F0051E90E /* spinnerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = spinnerView.m; sourceTree = "<group>"; };
+		72810E2325A653D40051E90E /* UIImageExtras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIImageExtras.h; sourceTree = "<group>"; };
+		72810E2425A653D40051E90E /* UIImageExtras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIImageExtras.m; sourceTree = "<group>"; };
+		72810E2A25A654D80051E90E /* icon128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon128.png; sourceTree = "<group>"; };
+		72810E2E25A65E4A0051E90E /* avatar02.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar02.png; sourceTree = "<group>"; };
+		72810E2F25A65E4A0051E90E /* avatar00.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar00.png; sourceTree = "<group>"; };
+		72810E3025A65E4A0051E90E /* avatar05.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar05.png; sourceTree = "<group>"; };
+		72810E3225A65E4B0051E90E /* avatar01.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar01.png; sourceTree = "<group>"; };
+		72810E3325A65E4B0051E90E /* avatar03.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar03.png; sourceTree = "<group>"; };
+		72810E3A25A65F0A0051E90E /* avatar04.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar04.png; sourceTree = "<group>"; };
 		72F3B25D25664E1300562343 /* ipumpi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ipumpi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		72F3B26025664E1300562343 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		72F3B26125664E1300562343 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -97,9 +126,27 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		72810E2925A654D80051E90E /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				7270298F25A91366008923B3 /* ipumpiRing.png */,
+				7270298B25A7D707008923B3 /* emptyUser.png */,
+				72810E2A25A654D80051E90E /* icon128.png */,
+				72810E2F25A65E4A0051E90E /* avatar00.png */,
+				72810E3225A65E4B0051E90E /* avatar01.png */,
+				72810E2E25A65E4A0051E90E /* avatar02.png */,
+				72810E3325A65E4B0051E90E /* avatar03.png */,
+				72810E3A25A65F0A0051E90E /* avatar04.png */,
+				72810E3025A65E4A0051E90E /* avatar05.png */,
+				7270298D25A82F5C008923B3 /* test1.png */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		72F3B25425664E1300562343 = {
 			isa = PBXGroup;
 			children = (
+				72810E2925A654D80051E90E /* Resources */,
 				72F3B25F25664E1300562343 /* ipumpi */,
 				72F3B25E25664E1300562343 /* Products */,
 				725A3376256653EF0074092E /* Frameworks */,
@@ -123,8 +170,14 @@
 				72F3B26425664E1300562343 /* SceneDelegate.m */,
 				72F3B26625664E1300562343 /* ViewController.h */,
 				72F3B26725664E1300562343 /* ViewController.m */,
+				72810E1D25A652EE0051E90E /* LoginViewController.h */,
+				72810E1E25A652EF0051E90E /* LoginViewController.m */,
+				72810E2025A6538F0051E90E /* spinnerView.h */,
+				72810E2125A6538F0051E90E /* spinnerView.m */,
 				72F3B27925664E3400562343 /* bleHelper.h */,
 				72F3B27A25664E3400562343 /* bleHelper.m */,
+				72810E2325A653D40051E90E /* UIImageExtras.h */,
+				72810E2425A653D40051E90E /* UIImageExtras.m */,
 				725A3391256657920074092E /* Reachability.h */,
 				725A3392256657920074092E /* Reachability.m */,
 				72F3B26925664E1300562343 /* Main.storyboard */,
@@ -193,9 +246,19 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				72810E3625A65E4B0051E90E /* avatar05.png in Resources */,
+				7270298C25A7D707008923B3 /* emptyUser.png in Resources */,
 				72F3B27025664E1600562343 /* LaunchScreen.storyboard in Resources */,
 				72F3B26D25664E1600562343 /* Assets.xcassets in Resources */,
+				72810E3925A65E4B0051E90E /* avatar03.png in Resources */,
+				7270298E25A82F5D008923B3 /* test1.png in Resources */,
+				72810E3525A65E4B0051E90E /* avatar00.png in Resources */,
+				72810E2B25A654D80051E90E /* icon128.png in Resources */,
+				72810E3425A65E4B0051E90E /* avatar02.png in Resources */,
+				7270299025A91366008923B3 /* ipumpiRing.png in Resources */,
 				72F3B26B25664E1300562343 /* Main.storyboard in Resources */,
+				72810E3B25A65F0B0051E90E /* avatar04.png in Resources */,
+				72810E3825A65E4B0051E90E /* avatar01.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -208,8 +271,11 @@
 			files = (
 				72F3B26825664E1300562343 /* ViewController.m in Sources */,
 				72F3B26225664E1300562343 /* AppDelegate.m in Sources */,
+				72810E2225A6538F0051E90E /* spinnerView.m in Sources */,
 				72F3B27B25664E3400562343 /* bleHelper.m in Sources */,
+				72810E2525A653D40051E90E /* UIImageExtras.m in Sources */,
 				72F3B27325664E1600562343 /* main.m in Sources */,
+				72810E1F25A652EF0051E90E /* LoginViewController.m in Sources */,
 				725A3393256657920074092E /* Reachability.m in Sources */,
 				72F3B26525664E1300562343 /* SceneDelegate.m in Sources */,
 			);
@@ -367,6 +433,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.001;
 				PRODUCT_BUNDLE_IDENTIFIER = com.myipumpi.ipumpi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -393,6 +460,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.001;
 				PRODUCT_BUNDLE_IDENTIFIER = com.myipumpi.ipumpi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
