@@ -9,6 +9,11 @@
 //   https://blog.sashido.io/emails-and-custom-user-facing-pages/
 //  NOTE third page is for avatar choice, NOT username handle!
 //    also NO huename now
+//  ALSO: now we change the login state from signup to login if user chooses login button
+// BUGS: avatar update doesnt work w/ photo chooser!
+//  havent checked out email reset yet!
+
+
 #import "LoginViewController.h"
 
 #define DONOT_IGNOREUSEREVENTS
@@ -35,8 +40,8 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
         //These are the pages we will switch between while creating an account
         //NOTE: state 0 DOES NOT EXIST, states are from 1 to 11!
         for (int i=0;i<=7;i++) createAccountStates[i] = i;
-        //Login state
-        loginState = 5;
+        //Login state , points to page 4 1/8/21
+        loginState = 4;
         //States for resetting the password
         for (int i=9;i<=10;i++) resetPasswordStates[i] = i;
         //Skip account setup
@@ -177,7 +182,11 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
 {
     NSLog(@" loginVC: entrymode %@",_entryMode);
     PFUser *user = PFUser.currentUser;
-    if ([_entryMode containsString : PL_SIGNUP_MODE])
+    if ([_entryMode containsString : PL_NO_MODE]) //1/8/21 Login OR signup?
+    {
+        page = 1;
+    }
+    else if ([_entryMode containsString : PL_SIGNUP_MODE])
     {
         page = createAccountStates[state];
     }
@@ -528,7 +537,7 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
     if (needToVerifyEmail)
         [self emailVerifyAlert]; //We need an alert over this page!
 
-} //end fifthPage
+} //end fourthPage
 
 //----LoginViewController---------------------------------
 // Password Reset...
@@ -672,17 +681,20 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
 {
     //NSLog(@" LSTopSelect state %d",state);
     if (DBBeingAccessed) return; //DO not advance while DB in progress!
-    //Handle signup sequence...
-    //DHS 12/6 bug! infinite loop in signup / pw reset! state == 6
-    if ([_entryMode containsString : PL_SIGNUP_MODE])
+    //no mode? login / signup? user has chosen to login
+    if ([_entryMode containsString : PL_NO_MODE])
     {
-        if (state == 1) //12/6 add check for state 6
+        if (state == 1) //at first state? switch to login mode and goto login page
         {
-            //WRONG?? _entryMode = PL_LOGIN_MODE; // 7/2 2nd login mode...
-            [self gotoPageForState:5]; //Goto login page
+            _entryMode = PL_LOGIN_MODE;
+            [self gotoPageForState:4]; // 1/8/21 Goto login page
         }
-        //DHS 6/23 reverse page 2 and 3
-        else if (state == 2) [self checkEmailAndPasswordforSignup];
+    }
+    //signup sequence? handle next page...
+    else if ([_entryMode containsString : PL_SIGNUP_MODE])
+    {
+        // 1/8/21 assume we never come from state 1, (or no_mode)
+        if (state == 2) [self checkEmailAndPasswordforSignup];
         else if (state == 3) [self signupOrUpdateUserAvatar];
         else if (state == 4) [self getEmailAndPasswordAndLogin];
         else if (state == 5) [self checkEmailforPasswordReset]; //DHS 12/6 wups!
@@ -701,10 +713,11 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
 }
 
 //----LoginViewController---------------------------------
-// This button is only used as a create account button for now...
+// This button is only used for signup...
 - (IBAction)LSBottomSelect:(id)sender
 {
     NSLog(@" LSBottomSelect");
+    _entryMode = PL_SIGNUP_MODE;
     [self gotoPageForState:2];
 }
 
@@ -808,14 +821,20 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
 - (IBAction)backSelect:(id)sender {
     BOOL bailit = FALSE;
     
+    // 1/8/21 login/signup choosing mode?
+    if ([_entryMode containsString : PL_NO_MODE])
+    {
+        if (state == 1)  
+        {
+            bailit = TRUE;
+        }
+    }
     //This mode has lots of states
-    if ([_entryMode containsString : PL_SIGNUP_MODE])
+    else if ([_entryMode containsString : PL_SIGNUP_MODE])
     {
         if (state == 1) //12/6 WHY ISNT this bailing!
         {
             bailit = TRUE;
-            //[self gotoPageForState:7];
-            //asdf
         }
         else if (state == 7 || state == 5) // Bailout/Login page? Return home
         {

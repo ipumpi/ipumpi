@@ -128,7 +128,7 @@
 
 
 - (IBAction)loginSelect:(id)sender {
-    loginVCMode = PL_SIGNUP_MODE;
+    loginVCMode = PL_NO_MODE;
     [self performSegueWithIdentifier:@"loginSegue" sender:@"mainVC"];
 
 }
