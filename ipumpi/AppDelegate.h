@@ -8,8 +8,11 @@
 
 #import <UIKit/UIKit.h>
 #import <Parse/Parse.h>
+#import "soundFX.h"
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
+
+@property (nonatomic, strong) soundFX *sfx;
 
 
 @end

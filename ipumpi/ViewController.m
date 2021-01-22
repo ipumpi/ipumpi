@@ -7,6 +7,8 @@
 //
 //  LINKS
 //   https://stackoverflow.com/questions/27216003/working-with-bluetooth-in-objective-c
+//
+//  1/21 add navbar
 
 #import "ViewController.h"
 
@@ -23,6 +25,8 @@
     {
         // 7/11 moved here
 //        appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+
+        _sfx         = [soundFX sharedInstance];
 
         ble = [bleHelper sharedInstance];
 
@@ -43,6 +47,20 @@
 
 
 //==========MainVC=========================================================================
+-(void) loadView
+{
+    [super loadView];
+    
+    CGSize csz   = [UIScreen mainScreen].bounds.size;
+    viewWid = (int)csz.width;
+    viewHit = (int)csz.height;
+    viewW2  = viewWid/2;
+    viewH2  = viewHit/2;
+    [self addNavBar];
+}
+
+
+//==========MainVC=========================================================================
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -56,10 +74,12 @@
     // Do any additional setup after loading the view.
 }
 
+
 //==========MainVC=========================================================================
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [self updateLoginButton];
 }
 
 
@@ -71,12 +91,201 @@
     [self updateView];
 }
 
+
+//==========MainVC=========================================================================
+-(void) addNavBar
+{
+    CGRect rr   = _footerView.frame ;  //NAV bar fills footer
+    rr.origin.x = 0;
+    rr.origin.y = 0;
+    //DHS 8/8 WTF?
+    rr.size.width = viewWid;
+    nav = [[NavButtons alloc] initWithFrameAndCount: rr : 4]; //four buttons!
+    nav.delegate = self;
+    [_footerView addSubview: nav];
+
+    // Home / Menu Button...
+    //int binset = 6;
+    //Menu button...
+    [nav setHotNot         : NNAV_MENU_BUTTON : [UIImage imageNamed:@"burgerHOT.jpg"]  :
+                                                [UIImage imageNamed:@"burgerNOT.jpg"] ];
+    [nav setLabelTextColor : NNAV_MENU_BUTTON   : [UIColor grayColor]];
+    [nav setHidden         : NNAV_MENU_BUTTON   : FALSE];
+    // 2 empty buttons...
+    [nav setHotNot         : NNAV_BUTTON_1 : [UIImage imageNamed:@"avatar00"]  :
+                                             [UIImage imageNamed:@"avatar00"] ];
+    [nav setLabelTextColor : NNAV_BUTTON_1 : [UIColor grayColor]];
+    [nav setHidden         : NNAV_BUTTON_1 : FALSE];
+
+    [nav setHotNot         : NNAV_BUTTON_2 : [UIImage imageNamed:@"avatar01"]  :
+                                             [UIImage imageNamed:@"avatar01"] ];
+    [nav setLabelTextColor : NNAV_BUTTON_2 : [UIColor grayColor]];
+    [nav setHidden         : NNAV_BUTTON_2 : FALSE]; //10/16 show create even logged out...
+
+    //login button...
+    UIImage *emptyUser = [UIImage imageNamed:@"emptyUser"];
+    [nav setHotNot         : NNAV_LOGIN_BUTTON : emptyUser : emptyUser ];
+//    [nav setCropped        : NNAV_LOGIN_BUTTON : 0.5];
+//    [nav setButtonInsets   : NNAV_LOGIN_BUTTON : binset];
+    [nav setLabelTextColor : NNAV_LOGIN_BUTTON : [UIColor grayColor]];
+    [nav setHidden         : NNAV_LOGIN_BUTTON :FALSE];
+    
+    //Make footer match header background
+    [nav setSolidBkgdColor : [UIColor clearColor] : 1]; //Color / alpha
+
+    //REMOVE FOR FINAL DELIVERY
+   // vn = [[UIVersionNumber alloc] initWithPlacement:UI_VERSIONNUMBER_TOPRIGHT];
+   // [nav addSubview:vn];
+} //end addNavBar
+
+
+//==========MainVC=========================================================================
+// shows logout, avatar change, etc choices
+- (void)putUpMenuChoices
+{
+    NSString *title = @"ipumpi main menu";
+    NSMutableAttributedString *tatString = [[NSMutableAttributedString alloc]initWithString: title];
+    [tatString addAttribute : NSForegroundColorAttributeName value:[UIColor blackColor]
+                       range:NSMakeRange(0, tatString.length)];
+    [tatString addAttribute:NSFontAttributeName value:[UIFont boldSystemFontOfSize:30]
+                      range:NSMakeRange(0, tatString.length)];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:
+                                NSLocalizedString(title,nil)
+                                message:nil
+                                preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert setValue:tatString forKey:@"attributedTitle"];
+
+    alert.view.tintColor = [UIColor blackColor];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Settings",nil)
+                                              style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+                                              }]];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"test1",nil)
+                                              style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+                                              }]];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"test2",nil)
+                                              style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+                                              }]];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"test3",nil)
+                                              style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+                                              }]];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",nil)
+                                              style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+                                                 [self->_sfx makeTicSoundWithPitch : 8 : 51];
+                                              }]];
+    [self presentViewController:alert animated:YES completion:nil];
+    
+
+} //end putUpMenuChoices
+
+//==========MainVC=========================================================================
+// shows logout, avatar change, etc choices
+- (void)putUpUserChoices
+{
+    NSString *title = [NSString stringWithFormat:@"Logged in as %@",
+                       PFUser.currentUser.username];
+
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:title
+                                                                   message:@""
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Logout",nil)
+                                              style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+                                                  [PFUser logOut];
+                                                  if ([PFUser currentUser] != nil)
+                                                  {
+                                                      NSLog(@"duh. no clear pfuser, is this a bug?");
+                                                  }
+                                                  [self updateLoginButton]; //12/10/18
+                                              }]];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Change Your Avatar",nil)
+                                              style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+                                                  if ([PFUser currentUser] != nil && (PFUser.currentUser.objectId != nil)) //Logged in?
+                                                  {
+                                                      self->loginVCMode = PL_AVATAR_MODE;
+                                                      [self performSegueWithIdentifier:@"loginSegue" sender:@"mainVC"];
+                                                  }
+                                              }]];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",nil)
+                                              style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+                                                [self->_sfx makeTicSoundWithPitch : 8 : 51];
+                                              }]];
+    [self presentViewController:alert animated:YES completion:nil];
+    
+
+} //end putUpUserChoices
+
+//==========MainVC=================================================================
+// called if/when login status changes, had to redo to access new custom huename
+// WOW how can all this be done outside mainVC??? sloppy!!!
+-(void) updateLoginButton
+{
+    //NSLog(@" check if logged in...");
+    //DHS 12/10/18
+    if ([PFUser currentUser] != nil && (PFUser.currentUser.objectId != nil)) //Logged in?
+    {
+        PFUser *user = PFUser.currentUser;
+        // Shit. we need to get full user refresh for custom field(s)...
+        PFQuery *query= [PFUser query];
+        NSString *emailString = [user valueForKey:@"email"];
+        // 8/28 getting a crash here, null emailString!
+        if (emailString == nil) //Should not happen? no email for this user?
+        {
+            [PFUser logOut]; //make sure we are logged out!
+            return;         //and bail
+        }
+        [query whereKey:@"email" equalTo:emailString]; //DHS 6/18 use huename now!
+        //[query whereKey:@"email" equalTo:[user valueForKey:@"email"]];
+        [query getFirstObjectInBackgroundWithBlock:^(PFObject *object, NSError *error){
+            if (object != nil) //Username available? goto next state...
+            {
+                PFFile *pff =      [object valueForKey:@"userPortrait"]; //replace with portraitkey at integrate time
+                [pff getDataInBackgroundWithBlock:^(NSData * _Nullable data, NSError * _Nullable error) {
+                    UIImage *profileImage = [UIImage imageNamed:@"emptyUser"];
+                    if (error)
+                    {
+                        NSLog(@" error fetching avatar...");
+                    }
+                    else
+                    {
+                        profileImage = [UIImage imageWithData:data];
+                    }
+                    NSString *uname = @""; //get first part of email...
+                    NSArray *vjunk = [emailString componentsSeparatedByString:@"@"];
+                    if (vjunk.count == 2)
+                    {
+                        uname = vjunk[0];
+                    }
+                    [self->nav setLabelText : NNAV_LOGIN_BUTTON : uname];
+                    [self->nav setHotNot:NNAV_LOGIN_BUTTON : profileImage : profileImage];
+                    [self->nav animateLogin:TRUE : profileImage];
+                }];
+            }
+            else
+            {
+                NSLog(@" error querying for user");
+                [self->nav setLabelText : NNAV_LOGIN_BUTTON : @"NAME"];
+                [self->nav setHotNot:NNAV_LOGIN_BUTTON : [UIImage imageNamed:@"vangogh120"] : [UIImage imageNamed:@"vangogh120"]];
+            }
+        }];
+    }
+    else //Logged out?
+    {
+        UIImage *ii = [UIImage imageNamed:@"emptyUser"];
+        [self->nav setHotNot    : NNAV_LOGIN_BUTTON :  ii: ii];
+        [self->nav setCropped   : NNAV_LOGIN_BUTTON : 0.01 * PORTRAIT_PERCENT];
+        [self->nav setLabelText : NNAV_LOGIN_BUTTON : @"login"];
+    }
+    [nav setNeedsDisplay];
+} //end updateLoginButton
+
+
 //====bleHelper notifications=====================================================
 -(void) updateView
 {
     _topLabel.text    = bstatus;
     _bottomLabel.text = pstatus;
 }
+
+
 
 //====bleHelper notifications=====================================================
 // called when bleHelpers centralManagerDidUpdateState
@@ -142,6 +351,12 @@
 
 }
 
+- (IBAction)logoutSelect:(id)sender
+{
+    [PFUser logOut];  
+    NSLog(@" Logged out from Parse...");
+}
+
 
 
 
@@ -159,5 +374,42 @@
     }
    
 } //end prepareForSegue
+
+#pragma mark - NavButtonsDelegate
+//==========MainVC=========================================================================
+-(void)  didSelectNavButton: (int) which
+{
+    [_sfx makeTicSoundWithPitch : 8 : 50 + which];
+    
+    //11/20 check status before loading...
+//    isOnline = fappDelegate.networkStatus; //11/20 add online checking...
+
+    if (which == NNAV_MENU_BUTTON) //menu...
+    {
+        NSLog(@" menu...");
+        [self putUpMenuChoices];
+
+    }
+    else if (which == NNAV_BUTTON_1) //b1...
+    {
+        NSLog(@" button 1...");
+    }
+    else if (which == NNAV_BUTTON_2) //b2...
+    {
+        NSLog(@" button 2...");
+    }
+    else if (which == NNAV_LOGIN_BUTTON) //User login button?
+    {
+        NSLog(@" login...");
+        if ([PFUser currentUser] != nil && (PFUser.currentUser.objectId != nil)) //already logged in?
+            [self putUpUserChoices]; //DHS 8/30 use alert style to avoid apple crash
+        else
+        {
+            loginVCMode = PL_NO_MODE;
+            [self performSegueWithIdentifier:@"loginSegue" sender:@"mainVC"];
+        }
+    }
+} //end didSelectNavButton
+
 
 @end

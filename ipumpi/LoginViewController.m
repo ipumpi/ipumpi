@@ -541,6 +541,8 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
 
 //----LoginViewController---------------------------------
 // Password Reset...
+// 1/12/21 BUG: return key seemed sticky entering email,
+//           and reset password button isnt working
 -(void) fifthPage
 {
     //First, hide fields we don't need...
@@ -606,9 +608,9 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
     _bottomLabel.hidden      = FALSE;
 
     //Set text fields...
-    _topLabel.text      = NSLocalizedString(@"Oh nohue\ndi\'nt",nil);
-    _topSmallLabel.text = NSLocalizedString(@"As HueGogh you can play,\n but can\'t create,share,\n or get a power color.",nil);
-    _bottomLabel.text = NSLocalizedString(@"You can always create an account later",nil);
+    _topLabel.text      = NSLocalizedString(@"test1\n",nil);
+    _topSmallLabel.text = NSLocalizedString(@"test2",nil);
+    _bottomLabel.text = NSLocalizedString(@"test3",nil);
     [_LSTopButton setTitle:NSLocalizedString(@"play anyway",nil) forState:UIControlStateNormal];
     
     animating = TRUE;
@@ -732,21 +734,27 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
 // Goes to reset pw page...
 - (IBAction)resetPasswordSelect:(id)sender
 {
-    page = state = 6; //Hard coded, state may be weird. just go to the right page
+    page = state = 5; //1/12/21 NEW page #
     [self gotoNthPage];
 } //end resetPasswordSelect
 
 //----LoginViewController---------------------------------
+//  called by checkEmailforPasswordReset
 -(void)performPasswordReset
 {
+    [spv start : NSLocalizedString(@"Resetting...",nil)];
+
 #ifdef IGNOREUSEREVENTS
     [UIApplication.sharedApplication beginIgnoringInteractionEvents];
 #endif
     [PFUser requestPasswordResetForEmailInBackground:_emailString
          block:^(BOOL succeeded, NSError *error) {
-             if (!error)
+            [spv stop];
+            if (!error)
              {
                  [self pixAlertDEBUG:self :@"Reset Successful" : @"Check your email to complete the password reset process." :false];
+                 self->state = 4; //1/12 setup to go back to login...
+                 [self gotoPageForState:self->state];
              }
              else
              {
@@ -755,7 +763,7 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
 #ifdef IGNOREUSEREVENTS
              [UIApplication.sharedApplication endIgnoringInteractionEvents];
 #endif
-             self->page = self->state = 5;
+             self->page = self->state = 4; //1/12/21 new page number
              [self gotoNthPage]; //Go to Login page now...
          }];
 } //end performPasswordReset
@@ -987,7 +995,7 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
     {
         [_LSTopButton setEnabled:(gotTop & gotBottom)];
     }
-    else if (state == 6) //password reset? bottom text entered?
+    else if (state == 5) //1/12/21 new page # password reset? bottom text entered?
     {
         [_LSTopButton setEnabled:gotTop];
     }
@@ -998,6 +1006,7 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
 //======(PixUtils)==========================================
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
+    //This should close text typein!??
     [textField resignFirstResponder];
     //DHS login try login if both text fields are filled...
     [self  getEmailAndPasswordAndLogin];

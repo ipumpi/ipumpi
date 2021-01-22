@@ -7,6 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		72112AEB25BADB57008A03AE /* NavButtons.m in Sources */ = {isa = PBXBuildFile; fileRef = 72112AEA25BADB57008A03AE /* NavButtons.m */; };
+		72112AF325BADCF8008A03AE /* burgerNOT.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 72112AF125BADCF8008A03AE /* burgerNOT.jpg */; };
+		72112AF425BADCF8008A03AE /* burgerHOT.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 72112AF225BADCF8008A03AE /* burgerHOT.jpg */; };
+		72112B0125BAE611008A03AE /* AudioBufferPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 72112AF725BAE611008A03AE /* AudioBufferPlayer.m */; };
+		72112B0225BAE611008A03AE /* SynthDave.m in Sources */ = {isa = PBXBuildFile; fileRef = 72112AFB25BAE611008A03AE /* SynthDave.m */; };
+		72112B0325BAE611008A03AE /* soundFX.m in Sources */ = {isa = PBXBuildFile; fileRef = 72112AFC25BAE611008A03AE /* soundFX.m */; };
+		72112B0425BAE611008A03AE /* oogieMidiStubs.m in Sources */ = {isa = PBXBuildFile; fileRef = 72112AFD25BAE611008A03AE /* oogieMidiStubs.m */; };
+		72112B1125BAE724008A03AE /* snap44k.wav in Resources */ = {isa = PBXBuildFile; fileRef = 72112B0725BAE724008A03AE /* snap44k.wav */; };
+		72112B1225BAE724008A03AE /* clave0044k.wav in Resources */ = {isa = PBXBuildFile; fileRef = 72112B0825BAE724008A03AE /* clave0044k.wav */; };
+		72112B1325BAE724008A03AE /* sq.wav in Resources */ = {isa = PBXBuildFile; fileRef = 72112B0925BAE724008A03AE /* sq.wav */; };
+		72112B1425BAE724008A03AE /* karate44k.wav in Resources */ = {isa = PBXBuildFile; fileRef = 72112B0A25BAE724008A03AE /* karate44k.wav */; };
+		72112B1525BAE724008A03AE /* timer44k.wav in Resources */ = {isa = PBXBuildFile; fileRef = 72112B0B25BAE724008A03AE /* timer44k.wav */; };
+		72112B1625BAE724008A03AE /* lilglock.wav in Resources */ = {isa = PBXBuildFile; fileRef = 72112B0C25BAE724008A03AE /* lilglock.wav */; };
+		72112B1725BAE724008A03AE /* blip.wav in Resources */ = {isa = PBXBuildFile; fileRef = 72112B0D25BAE724008A03AE /* blip.wav */; };
+		72112B1825BAE724008A03AE /* congamid44k.wav in Resources */ = {isa = PBXBuildFile; fileRef = 72112B0E25BAE724008A03AE /* congamid44k.wav */; };
+		72112B1925BAE724008A03AE /* bub1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 72112B0F25BAE724008A03AE /* bub1.wav */; };
+		72112B1A25BAE724008A03AE /* bigweiner.wav in Resources */ = {isa = PBXBuildFile; fileRef = 72112B1025BAE724008A03AE /* bigweiner.wav */; };
 		725A337C256654070074092E /* ParseUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 725A3379256654070074092E /* ParseUI.framework */; };
 		725A337D256654070074092E /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 725A337A256654070074092E /* Parse.framework */; };
 		725A337E256654070074092E /* ParseCrashReporting.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 725A337B256654070074092E /* ParseCrashReporting.framework */; };
@@ -41,6 +58,30 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		72112AE925BADB57008A03AE /* NavButtons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NavButtons.h; sourceTree = "<group>"; };
+		72112AEA25BADB57008A03AE /* NavButtons.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NavButtons.m; sourceTree = "<group>"; };
+		72112AF125BADCF8008A03AE /* burgerNOT.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = burgerNOT.jpg; sourceTree = "<group>"; };
+		72112AF225BADCF8008A03AE /* burgerHOT.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = burgerHOT.jpg; sourceTree = "<group>"; };
+		72112AF725BAE611008A03AE /* AudioBufferPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioBufferPlayer.m; sourceTree = "<group>"; };
+		72112AF825BAE611008A03AE /* cheat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cheat.h; sourceTree = "<group>"; };
+		72112AF925BAE611008A03AE /* oogieMidiStubs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = oogieMidiStubs.h; sourceTree = "<group>"; };
+		72112AFA25BAE611008A03AE /* soundFX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = soundFX.h; sourceTree = "<group>"; };
+		72112AFB25BAE611008A03AE /* SynthDave.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SynthDave.m; sourceTree = "<group>"; };
+		72112AFC25BAE611008A03AE /* soundFX.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = soundFX.m; sourceTree = "<group>"; };
+		72112AFD25BAE611008A03AE /* oogieMidiStubs.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = oogieMidiStubs.m; sourceTree = "<group>"; };
+		72112AFE25BAE611008A03AE /* AudioBufferPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioBufferPlayer.h; sourceTree = "<group>"; };
+		72112AFF25BAE611008A03AE /* GMidi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMidi.h; sourceTree = "<group>"; };
+		72112B0025BAE611008A03AE /* SynthDave.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SynthDave.h; sourceTree = "<group>"; };
+		72112B0725BAE724008A03AE /* snap44k.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = snap44k.wav; sourceTree = "<group>"; };
+		72112B0825BAE724008A03AE /* clave0044k.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = clave0044k.wav; sourceTree = "<group>"; };
+		72112B0925BAE724008A03AE /* sq.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sq.wav; sourceTree = "<group>"; };
+		72112B0A25BAE724008A03AE /* karate44k.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = karate44k.wav; sourceTree = "<group>"; };
+		72112B0B25BAE724008A03AE /* timer44k.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = timer44k.wav; sourceTree = "<group>"; };
+		72112B0C25BAE724008A03AE /* lilglock.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = lilglock.wav; sourceTree = "<group>"; };
+		72112B0D25BAE724008A03AE /* blip.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = blip.wav; sourceTree = "<group>"; };
+		72112B0E25BAE724008A03AE /* congamid44k.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = congamid44k.wav; sourceTree = "<group>"; };
+		72112B0F25BAE724008A03AE /* bub1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = bub1.wav; sourceTree = "<group>"; };
+		72112B1025BAE724008A03AE /* bigweiner.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = bigweiner.wav; sourceTree = "<group>"; };
 		725A3377256653EF0074092E /* 3rdparty */ = {isa = PBXFileReference; lastKnownFileType = folder; path = 3rdparty; sourceTree = "<group>"; };
 		725A3379256654070074092E /* ParseUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ParseUI.framework; path = 3rdparty/ParseUI.framework; sourceTree = "<group>"; };
 		725A337A256654070074092E /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Parse.framework; path = 3rdparty/Parse.framework; sourceTree = "<group>"; };
@@ -107,6 +148,40 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		72112AF625BAE611008A03AE /* audio */ = {
+			isa = PBXGroup;
+			children = (
+				72112AF725BAE611008A03AE /* AudioBufferPlayer.m */,
+				72112AF825BAE611008A03AE /* cheat.h */,
+				72112AF925BAE611008A03AE /* oogieMidiStubs.h */,
+				72112AFA25BAE611008A03AE /* soundFX.h */,
+				72112AFB25BAE611008A03AE /* SynthDave.m */,
+				72112AFC25BAE611008A03AE /* soundFX.m */,
+				72112AFD25BAE611008A03AE /* oogieMidiStubs.m */,
+				72112AFE25BAE611008A03AE /* AudioBufferPlayer.h */,
+				72112AFF25BAE611008A03AE /* GMidi.h */,
+				72112B0025BAE611008A03AE /* SynthDave.h */,
+			);
+			path = audio;
+			sourceTree = "<group>";
+		};
+		72112B0625BAE724008A03AE /* Samples */ = {
+			isa = PBXGroup;
+			children = (
+				72112B0725BAE724008A03AE /* snap44k.wav */,
+				72112B0825BAE724008A03AE /* clave0044k.wav */,
+				72112B0925BAE724008A03AE /* sq.wav */,
+				72112B0A25BAE724008A03AE /* karate44k.wav */,
+				72112B0B25BAE724008A03AE /* timer44k.wav */,
+				72112B0C25BAE724008A03AE /* lilglock.wav */,
+				72112B0D25BAE724008A03AE /* blip.wav */,
+				72112B0E25BAE724008A03AE /* congamid44k.wav */,
+				72112B0F25BAE724008A03AE /* bub1.wav */,
+				72112B1025BAE724008A03AE /* bigweiner.wav */,
+			);
+			path = Samples;
+			sourceTree = "<group>";
+		};
 		725A3376256653EF0074092E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -129,6 +204,8 @@
 		72810E2925A654D80051E90E /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				72112AF225BADCF8008A03AE /* burgerHOT.jpg */,
+				72112AF125BADCF8008A03AE /* burgerNOT.jpg */,
 				7270298F25A91366008923B3 /* ipumpiRing.png */,
 				7270298B25A7D707008923B3 /* emptyUser.png */,
 				72810E2A25A654D80051E90E /* icon128.png */,
@@ -146,6 +223,7 @@
 		72F3B25425664E1300562343 = {
 			isa = PBXGroup;
 			children = (
+				72112B0625BAE724008A03AE /* Samples */,
 				72810E2925A654D80051E90E /* Resources */,
 				72F3B25F25664E1300562343 /* ipumpi */,
 				72F3B25E25664E1300562343 /* Products */,
@@ -164,6 +242,7 @@
 		72F3B25F25664E1300562343 /* ipumpi */ = {
 			isa = PBXGroup;
 			children = (
+				72112AF625BAE611008A03AE /* audio */,
 				72F3B26025664E1300562343 /* AppDelegate.h */,
 				72F3B26125664E1300562343 /* AppDelegate.m */,
 				72F3B26325664E1300562343 /* SceneDelegate.h */,
@@ -172,6 +251,8 @@
 				72F3B26725664E1300562343 /* ViewController.m */,
 				72810E1D25A652EE0051E90E /* LoginViewController.h */,
 				72810E1E25A652EF0051E90E /* LoginViewController.m */,
+				72112AE925BADB57008A03AE /* NavButtons.h */,
+				72112AEA25BADB57008A03AE /* NavButtons.m */,
 				72810E2025A6538F0051E90E /* spinnerView.h */,
 				72810E2125A6538F0051E90E /* spinnerView.m */,
 				72F3B27925664E3400562343 /* bleHelper.h */,
@@ -248,16 +329,28 @@
 			files = (
 				72810E3625A65E4B0051E90E /* avatar05.png in Resources */,
 				7270298C25A7D707008923B3 /* emptyUser.png in Resources */,
+				72112AF325BADCF8008A03AE /* burgerNOT.jpg in Resources */,
 				72F3B27025664E1600562343 /* LaunchScreen.storyboard in Resources */,
+				72112B1325BAE724008A03AE /* sq.wav in Resources */,
 				72F3B26D25664E1600562343 /* Assets.xcassets in Resources */,
+				72112B1925BAE724008A03AE /* bub1.wav in Resources */,
 				72810E3925A65E4B0051E90E /* avatar03.png in Resources */,
+				72112B1625BAE724008A03AE /* lilglock.wav in Resources */,
 				7270298E25A82F5D008923B3 /* test1.png in Resources */,
+				72112B1825BAE724008A03AE /* congamid44k.wav in Resources */,
+				72112B1525BAE724008A03AE /* timer44k.wav in Resources */,
 				72810E3525A65E4B0051E90E /* avatar00.png in Resources */,
 				72810E2B25A654D80051E90E /* icon128.png in Resources */,
+				72112B1A25BAE724008A03AE /* bigweiner.wav in Resources */,
 				72810E3425A65E4B0051E90E /* avatar02.png in Resources */,
 				7270299025A91366008923B3 /* ipumpiRing.png in Resources */,
 				72F3B26B25664E1300562343 /* Main.storyboard in Resources */,
+				72112B1725BAE724008A03AE /* blip.wav in Resources */,
+				72112B1125BAE724008A03AE /* snap44k.wav in Resources */,
 				72810E3B25A65F0B0051E90E /* avatar04.png in Resources */,
+				72112AF425BADCF8008A03AE /* burgerHOT.jpg in Resources */,
+				72112B1425BAE724008A03AE /* karate44k.wav in Resources */,
+				72112B1225BAE724008A03AE /* clave0044k.wav in Resources */,
 				72810E3825A65E4B0051E90E /* avatar01.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -269,14 +362,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				72112B0225BAE611008A03AE /* SynthDave.m in Sources */,
 				72F3B26825664E1300562343 /* ViewController.m in Sources */,
+				72112B0425BAE611008A03AE /* oogieMidiStubs.m in Sources */,
 				72F3B26225664E1300562343 /* AppDelegate.m in Sources */,
 				72810E2225A6538F0051E90E /* spinnerView.m in Sources */,
+				72112AEB25BADB57008A03AE /* NavButtons.m in Sources */,
 				72F3B27B25664E3400562343 /* bleHelper.m in Sources */,
+				72112B0125BAE611008A03AE /* AudioBufferPlayer.m in Sources */,
 				72810E2525A653D40051E90E /* UIImageExtras.m in Sources */,
 				72F3B27325664E1600562343 /* main.m in Sources */,
 				72810E1F25A652EF0051E90E /* LoginViewController.m in Sources */,
 				725A3393256657920074092E /* Reachability.m in Sources */,
+				72112B0325BAE611008A03AE /* soundFX.m in Sources */,
 				72F3B26525664E1300562343 /* SceneDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -418,7 +516,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = SYJFT88983;
+				DEVELOPMENT_TEAM = DP6T5YZ4M4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/3rdparty",
@@ -433,7 +531,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.002;
+				MARKETING_VERSION = 1.0.004;
 				PRODUCT_BUNDLE_IDENTIFIER = com.myipumpi.ipumpi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -445,7 +543,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = SYJFT88983;
+				DEVELOPMENT_TEAM = DP6T5YZ4M4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/3rdparty",
@@ -460,7 +558,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.002;
+				MARKETING_VERSION = 1.0.004;
 				PRODUCT_BUNDLE_IDENTIFIER = com.myipumpi.ipumpi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
