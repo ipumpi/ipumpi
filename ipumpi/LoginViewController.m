@@ -1,3 +1,9 @@
+//   _             _    __     ______
+//  | | ___   __ _(_)_ _\ \   / / ___|
+//  | |/ _ \ / _` | | '_ \ \ / / |
+//  | | (_) | (_| | | | | \ V /| |___
+//  |_|\___/ \__, |_|_| |_|\_/  \____|
+//           |___/
 //
 //  LoginViewController.m
 //  PixLogin
@@ -181,7 +187,7 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
 -(void) getPageForState
 {
     NSLog(@" loginVC: entrymode %@",_entryMode);
-    PFUser *user = PFUser.currentUser;
+    //PFUser *user = PFUser.currentUser;
     if ([_entryMode containsString : PL_NO_MODE]) //1/8/21 Login OR signup?
     {
         page = 1;
@@ -749,7 +755,7 @@ NSString *const _PuserPortraitKey       = @"userPortrait";
 #endif
     [PFUser requestPasswordResetForEmailInBackground:_emailString
          block:^(BOOL succeeded, NSError *error) {
-            [spv stop];
+        [self->spv stop];
             if (!error)
              {
                  [self pixAlertDEBUG:self :@"Reset Successful" : @"Check your email to complete the password reset process." :false];

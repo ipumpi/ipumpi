@@ -59,8 +59,8 @@
 + (id)sharedInstance;
 -(void) loadAudio;
 -(void) loadAudioBKGD : (int) immediateSampleNum;
--(void) loadAudioBKGDForOOGIE : (int) immediateSampleNum;
--(void) loadAudioForOOGIE;
+// 3/27/21 no need -(void) loadAudioBKGDForOOGIE : (int) immediateSampleNum;
+// 4/16 obsolete -(void) loadAudioForOOGIE;
 -(NSArray *) loadSamplesNow : (NSString*)pname : (int) sampleBase;
 -(NSMutableDictionary*) loadGeneralMidiNames;
 -(void) copyBuffer : (int) from : (int) to : (BOOL) clear;
@@ -109,10 +109,12 @@
 //DHS 2019: Synth convenience functions, for oogie/swift
 - (void)buildEnvelope:(int)a1 : (BOOL) a2;
 -(void) buildaWaveTable : (int) a1 : (int) a2;
+- (NSDictionary*) getSampleHeader:(NSString *)soundFilePath;
 -(int)  getSynthNoteCount;
 -(int)  getSynthUniqueCount;
 -(int)  makeSureNoteisInKey : (int) a1 : (int) a2;
 -(void) playNote : (int) a1 : (int) a2 : (int) a3;
+-(void) playNoteWithDelay : (int) a1 : (int) a2 : (int) a3 : (int) a4;
 -(void) queueNote : (int) a1 : (int) a2 : (int) a3;
 -(void) releaseNote : (int) a1 : (int) a2;
 -(void) setSynthAttack : (int) a1;
@@ -142,6 +144,20 @@
 - (void) setSynthVibWave:  (int) newVal;
 - (void) setSynthVibSpeed: (int) newVal;
 - (void) setSynthVibDelay: (int) newVal;
+- (void) setSynthVibeAmpl:  (int) newVal; //4/8 new amplitude vibe
+- (void) setSynthVibeWave:  (int) newVal;
+- (void) setSynthVibeSpeed: (int) newVal;
+- (void) setSynthVibeDelay: (int) newVal;
+
+//3/2/21 internal synth digital delay
+-(void) setSynthDelayVars : (int)a1 : (int)a2 : (int)a3;
+-(void) synthDelaySend : (float)a1 : (float) a2;
+-(float) synthDelayReturnLorRWithAutoIncrement;
+
+// 2/12/21 fine tune support
+-(void) setSynthPLevel : (int) a1; //patch level
+-(void) setSynthPKeyOffset : (int) a1;
+-(void) setSynthPKeyDetune : (int) a1;
 
 // 6/21 hand down to synth
 -(void)startRecording:(int)newlen;
@@ -151,8 +167,6 @@
 -(NSString *)getAudioOutputFileName;
 -(NSString *)getAudioOutputFullPath;
 -(void) setRecordingFolder : (NSString *) fname;
-
--(void) setNoteOffset: (int) which : (NSString*) fname;
 
 -(void) loadAudioToBuffer : (NSString*)name : (int) whichBuffer;
 -(void) setNoteOffset: (int) which : (NSString*) fname; //10/6

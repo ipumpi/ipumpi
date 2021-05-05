@@ -21,7 +21,10 @@
 // DHS 11/6     move GeneralMidiNames to Misc subfolder
 // DHS 11/9     add getWorkBuffer, getEnvelopeForDisplay
 // DHS 6/19-22  add recording hooks into synth
-// DHS 1/21/21  fix makeTicSound..., clear envelope in all cases
+// 2/12/21      add fineTuning
+// 2/19/21      add playNoteWithDelay to support delay
+// 4/8          add ampl Vibe support
+// 4/20 fix warnings inside closures, added self-> etc as needed
 #include "soundFX.h"
 
 @implementation soundFX
@@ -300,6 +303,14 @@ int HH,LL,SS;  //Used in rgb -> HLS
 {
     [synth playNote : a1 : a2 : a3];
 }
+
+//2/19/21 to support delay
+-(void) playNoteWithDelay : (int) a1 : (int) a2 : (int) a3 : (int) a4
+{
+    [synth playNoteWithDelay: a1 : a2 : a3 : a4];
+}
+
+
 -(void) queueNote : (int) a1 : (int) a2 : (int) a3
 {
     [synth queueNote : a1 : a2 : a3];
@@ -405,6 +416,33 @@ int HH,LL,SS;  //Used in rgb -> HLS
 - (void) setSynthVibWave:  (int) a1   {[synth setVibWave  : a1];}
 - (void) setSynthVibSpeed: (int) a1   {[synth setVibSpeed : a1];}
 - (void) setSynthVibDelay: (int) a1   {[synth setVibDelay : a1];}
+//4/8/21 synth amplitude vibe . . .
+- (void) setSynthVibeAmpl:  (int) a1   {[synth setVibeAmpl  : a1];}
+- (void) setSynthVibeWave:  (int) a1   {[synth setVibeWave  : a1];}
+- (void) setSynthVibeSpeed: (int) a1   {[synth setVibeSpeed : a1];}
+- (void) setSynthVibeDelay: (int) a1   {[synth setVibeDelay : a1];}
+
+//3/2/21 digital delay
+-(void) setSynthDelayVars : (int)a1 : (int)a2 : (int)a3
+{
+    [synth setDelayVars : a1 : a2 : a3];
+}
+-(void) synthDelaySend : (float)a1 : (float) a2
+{
+    [synth delaySend:a1 :a2];
+}
+-(float) synthDelayReturnLorRWithAutoIncrement
+{
+    return [synth delayReturnLorRWithAutoIncrement];
+}
+
+
+
+//2/12/21 add fine tuning
+-(void) setSynthPLevel     : (int) a1 {[synth setPLevel : a1];}
+-(void) setSynthPKeyOffset : (int) a1 {[synth setPKeyOffset : a1];}
+-(void) setSynthPKeyDetune : (int) a1 {[synth setPKeyDetune : a1];}
+
 
 
 -(void) testDump
@@ -459,7 +497,7 @@ int HH,LL,SS;  //Used in rgb -> HLS
 
 //=====(soundFX)==========================================
 // 9/22 test
-- (void)makePercSound : (int) which: (int) note
+- (void)makePercSound : (int) which : (int) note
 {
     [synth setDetune: 0];
     synth.gain = 1.0;
@@ -504,11 +542,6 @@ int HH,LL,SS;  //Used in rgb -> HLS
     if (!_enabled || !soundFileLoaded[which]) return;
     //NSLog(@" ticpitch %d %d %d",which,ppitch,level);
     [synth setDetune: 1];
-    //1/21/21 Need to clear ADSR for sample to play!
-    [synth setAttack:0];
-    [synth setDecay: 0];
-    [synth setSustain: 0];
-    [synth setRelease: 0];
     synth.gain = (float)level / 256.0;
     //DHS 7/24 WYUPS  [synth setGain:level];
     [synth setPan:128];   // Center pan
@@ -526,11 +559,6 @@ int HH,LL,SS;  //Used in rgb -> HLS
     if (!_enabled || !soundFileLoaded[which]) return;
     //NSLog(@" ticpitch %d %d %d",which,ppitch,level);
     [synth setDetune: 1];
-    //1/21/21 Need to clear ADSR for sample to play!
-    [synth setAttack:0];
-    [synth setDecay: 0];
-    [synth setSustain: 0];
-    [synth setRelease: 0];
     synth.gain = (float)level / 256.0;
 //    [synth setGain:level];
     [synth setPan:pan];   // Center pan
@@ -550,17 +578,18 @@ int HH,LL,SS;  //Used in rgb -> HLS
     if (!_enabled || !soundFileLoaded[which]) return;
     [synth setDetune: 1];
     synth.gain = 22.0 / 256.0;
-    //1/21/21 Need to clear ADSR for sample to play!
-    [synth setAttack:0];
-    [synth setDecay: 0];
-    [synth setSustain: 0];
-    [synth setRelease: 0];
 //    [synth setGain:22];
     [synth setPan:128];   // Center pan
     [synth playNote:note:which:SAMPLE_VOICE];
     
 } //end makeTicSoundWithPitch
 
+//=========(soundFX)========================================================================
+// 4/27 pass da buck
+- (NSDictionary*) getSampleHeader:(NSString *)soundFilePath
+{
+    return [synth getSampleHeader: soundFilePath];
+}
 
 
 //=========(soundFX)========================================================================
@@ -636,7 +665,6 @@ int HH,LL,SS;  //Used in rgb -> HLS
 //   right away in the foreground, -1 means no immediate num
 -(void) loadAudioBKGD : (int) immediateSampleNum
 {
-    NSLog(@" loadaudiobkgd...");
     //Load audio samples...
     int sampnum = immediateSampleNum;
     if (sampnum >= 0 && sampnum != 99)  //Got an immediate sample to load?  DHS 2/8/
@@ -662,18 +690,18 @@ int HH,LL,SS;  //Used in rgb -> HLS
                                if (loop != immediateSampleNum)
                                {
                                    //9/25 check for error names!
-                                   NSString *sname = soundFileNames[loop];
+                                   NSString *sname = self->soundFileNames[loop];
                                    if (sname != nil && sname.length > 2)
                                    {
-                                       [synth loadSample:sname:@"wav"];
-                                       [synth buildSampleTable:ssampnum];
-                                       soundFileLoaded[ssampnum] = true;
-                                       //NSLog(@" ...loaded sample[%d][%@] into buffer %d",loop,soundFileNames[loop],ssampnum);
+                                       [self->synth loadSample:sname:@"wav"];
+                                       [self->synth buildSampleTable:ssampnum];
+                                       self->soundFileLoaded[ssampnum] = true;
+                                       //NSLog(@" ...loaded sample[%d][%@] into buffer %d",loop,self->soundFileNames[loop],ssampnum);
                                    }
                                }
                                ssampnum++;
                            }
-                          [_delegate didLoadSFX];
+                           [self->_delegate didLoadSFX];
                        });
                        
                    }

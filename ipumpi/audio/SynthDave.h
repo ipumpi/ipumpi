@@ -24,6 +24,8 @@
 //              all voices can be harmony as needed!
 // 9/25 Re-partition samples: 0..31 = work area (including vibrato waves)
 //                            32..end = loaded samples area...
+// 1/26  redid arpQueue, enlarged, made doubles, changed time calculations
+// 3/2   add digital delay
 #import <AudioToolbox/AudioToolbox.h>
 #import <AudioUnit/AudioUnit.h>
 #import <AudioToolbox/AudioFile.h>
@@ -125,9 +127,16 @@ typedef struct
     int  vibWave;
     int  vibSpeed;
     int  vibDelay;    //TBD
-    BOOL vibEnabled; //7/17 internal vib vars
     float vibIndex;
     float vibStep;
+    BOOL vibEnabled; //7/17 internal vib vars
+    int  vibeAmpl;    //4/8 amplitude vibe
+    int  vibeWave;
+    int  vibeSpeed;
+    int  vibeDelay;    //TBD
+    float vibeIndex;
+    float vibeStep;
+    BOOL vibeEnabled; //7/17 internal vib vars
     int timetrax;
     int portcount;
     int un;
@@ -139,7 +148,7 @@ ToneEvent;
 //Synth AND sampler is in one object....
 #define MAX_SAMPLES 512 //6/23 bottom 256 factory,addons; top 256 user generated
 #define MAX_QUEUE 32  //queue size for notes played between quant steps
-#define MAX_ARP 256  // arpeggiator size...
+#define MAX_ARP 8192  //2/26/21 enlarge arpeggiator size...
 @interface Synth : NSObject
 {
     float masterTune;   //DHS 1/11/13 new overall tuning, +/- .5 semitone
@@ -164,12 +173,15 @@ ToneEvent;
 	int detune;         ///< overall detune flag...
     //Last ADSR length
     int attackLength, decayLength , sustainLength, releaseLength;
-
+    //Delay section 3/2/21
+    float *delayBuf;
+    int dwptr,drptr; //read/write delay pointers
+    
 	ToneEvent tones[MAX_TONE_EVENTS];
     int queuePtr,arpPtr;
     int arpPlayPtr;
     float noteQueue[16][MAX_QUEUE];
-    float arpQueue[16][MAX_ARP];   //Arpeggiator: voice/note/volume/pan
+    double arpQueue[16][MAX_ARP];   //Arpeggiator: voice/note/volume/pan
 	/// fundamental frequencies for all MIDI note numbers
 	float pitches[256];
     int numPVoices;
@@ -181,6 +193,11 @@ ToneEvent;
     int  vibWave;
     int  vibSpeed;
     int  vibDelay;
+    int  vibeAmpl;    //4/8 amplitude vibe
+    int  vibeWave;
+    int  vibeSpeed;
+    int  vibeDelay;
+    int pLevel,pKeyOffset,pKeyDetune; //2/12/21 fine tuning
     int timetrax;
     int recording,reclength,recptr,recsize;
     int needToMailAudioFile;
@@ -191,6 +208,10 @@ ToneEvent;
     NSTimer *arptimer;
     //6/22/20
     int recordfileIndex; //used to name output recordings
+    
+    // 3/2/21 digital delay
+    int delayTime,delaySustain,delayMix;
+    int delayBufSize;
 }
 
 #define NULL_VOICE -1
@@ -209,6 +230,8 @@ ToneEvent;
 #define SYNTHR_DEFAULT			20.0;
 #define SYNTHDUTY_DEFAULT		50.0;
 
+#define MAX_DELAY_SECONDS 2
+
 @property (nonatomic, assign) float gain;
 @property (nonatomic, assign) int mono;
 @property (nonatomic, assign) int poly;
@@ -224,7 +247,7 @@ ToneEvent;
 -(void) pauseRecording;
 -(void) unpauseRecording;
 
-- (void)writeOutputSampleFile:(NSString *)name :(NSString *)type;
+//4/2/21 no need - (void)writeOutputSampleFile:(NSString *)name :(NSString *)type;
  
 // Initializes the Synth.
 - (id)initWithSampleRate:(float)sampleRate;
@@ -277,7 +300,8 @@ ToneEvent;
 - (int)getBufferSize: (int) index;
 - (int)getNoteCount;
 - (int)getEnvDataLen:(int)which  ;
-- (int)getUniqueCount; 
+- (NSDictionary*) getSampleHeader:(NSString *)soundFilePath;
+- (int)getUniqueCount;
 - (void)incrVoiceCount:(int)n;
 - (void)setMonoUN: (int)un ;
 - (void)releaseAllNotes;
@@ -306,7 +330,21 @@ ToneEvent;
 - (void) setVibWave:  (int) newVal;
 - (void) setVibSpeed: (int) newVal;
 - (void) setVibDelay: (int) newVal;
+- (void) setVibeAmpl:  (int) newVal;
+- (void) setVibeWave:  (int) newVal;
+- (void) setVibeSpeed: (int) newVal;
+- (void) setVibeDelay: (int) newVal;
 - (void) setNoteOffset: (int) which : (NSString*) fname;
+//2/12/21 fine tuning
+-(void) setPLevel     : (int) a1; //patch level
+-(void) setPKeyOffset : (int) a1;
+-(void) setPKeyDetune : (int) a1;
+
+-(void) setDelayVars : (int)dtime : (int)dsustain : (int)dmix;
+-(void) delaySend : (float)ml : (float) mr;
+-(float) delayReturnLorRWithAutoIncrement;
+
+
 
 - (void)loadSample:(NSString *)name :(NSString *)type ;
 - (void)loadSampleFromPath : (NSString *)subFolder : (NSString *)fileName;

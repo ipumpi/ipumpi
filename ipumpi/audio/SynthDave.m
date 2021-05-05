@@ -42,6 +42,14 @@
 //                            32..end = loaded samples area...
 //    10/8  add sTuningOffsets and setNoteOffset
 //    10/31 add freeSampleMemory and cleanupBuffersAbove
+//  2/12/21 add fineTuning
+//  3/26    add dumpTone
+//  3/29    HUH??add sanity check in fillBuffers, WTF w/ negative indices!
+//  4/26    add midiNote clamp 0..128 in playNote
+//  4/29    pull swave, use unsigned char fileBuffer, support 32 bit files too
+//  4/30    getVibeLevel: input wave range 0..1 NOT -1..1!!
+//          getVibOffset: input wave range MAKE -1..1 to center vib freq
+//          also set DUTY to 0.5 when creating square vib waves, was random b4
 #import <QuartzCore/CABase.h>
 #import "SynthDave.h"
 #include "oogieMidiStubs.h"
@@ -101,8 +109,8 @@ double drand(double lo_range,double hi_range );
 int gotSample,sampleSize;
 //#define MAX_SAMPLE_SIZE 1655360   //canned for now, allocate later for multisamples
 #define MAX_SAMPLE_SIZE 12000000   //HDK: new max size, allows for ambient bkgd music
-unsigned short *swave = NULL;
-int swaveSize;
+unsigned char  *fileBuffer = NULL;  //4/29 for universal file work area
+int fileBufferSize;     //4/29
 int sPacketSize,sNumPackets,sChans;  //sample channels...
 
 #define TWOBYTESAMPLERANGE 65535.0
@@ -133,9 +141,10 @@ short *audioRecBuffer;
 		finalMixGain        = 1.0;
 		gotSample           = 0;
         //4/12/20 just alloc the WAV file storage buffer ONCE, max size
-        swave = (unsigned short *)malloc(MAX_SAMPLE_SIZE);
+        fileBuffer = (unsigned char *)malloc(MAX_SAMPLE_SIZE*2);
+
         //MAX_SAMPLE_SIZE
-        swaveSize           = 0;
+        fileBufferSize      = 0;   //4/29
 		glpan = grpan       = 0.5;  //set to center pan for now
         portamentoLastNote  = 0;    // 6/26 time = 0 means no portamento
         portamentoTime      = 0;       // 6/26
@@ -176,6 +185,12 @@ short *audioRecBuffer;
 		}
 		LOOPIT(MAX_TONE_EVENTS)tones[loop].state = STATE_INACTIVE;		
 
+        //3/2/21 digital delay
+        delayBuf = nil;
+        dwptr = drptr = 0;
+        [self initDigitalDelay];
+        delayMix = delayTime = delaySustain = 0;
+        
 		[self equalTemperament];
 		//OK get our wave setup and built
 		sineLength = 2 * (int)sampleRate;
@@ -191,15 +206,18 @@ short *audioRecBuffer;
         LOOPIT(16) lvolbuf[loop]=0.0;
         LOOPIT(16) rvolbuf[loop]=0.0;
         lrvolptr=lrvolmod=0;
-        
-        arptimer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(arptimerTick:) userInfo:nil repeats:YES];
+ 
+        // 2/26 try calling directly from fillBuffer instead...
+        //3/15 test, arp gets called from fillBuffer instead
+//        arptimer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self
+//                  selector:@selector(arptimerTick:) userInfo:nil repeats:YES];
 
         //Vibrato test, use buffer 99 for vibrato sine wave...
+        DUTY_TIME = 0.5; //4/30 canned 50/50 square wave for vibrato
+        
         for (int i=0;i<4;i++)
            [self buildaWaveTable:VIBRATO_WAVE_BASE+i :i];  //lets use buffer 1 for vibrato??
 	}
-
-    
 	return self;
 } //end initWithSampleRate
 
@@ -222,12 +240,14 @@ short *audioRecBuffer;
 {
 	int loop;
     NSLog(@" dealloc: Free all");
-    swaveSize = 0;
+    fileBufferSize = 0;    //4/29
     LOOPIT(MAX_SAMPLES) [self freeSampleMemory:loop];
 }
 
 //------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
-// 10/31 used in dealloc and cleanupBuffersAbove
+// 10/31 used in dealloc and cleanupBuffersAbove,
+//  seeing a krash caused by this somehow?
+//  I think it is the synth trying to play a note from a deleted buffer!
 -(void) freeSampleMemory:(int) index
 {
     if (sBufs[index] != NULL)
@@ -243,27 +263,36 @@ short *audioRecBuffer;
     }
 } //end freeSampleMemory
 
-
 //------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
+// 3/15/21
 - (void)arptimerTick:(NSTimer *)timer
 {
-    
+    [self arpUpdate];
+}
+
+
+//------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
+// 3/15/21
+- (void)arpUpdate
+{
+    //NSLog(@" arpptrs %d vs %d",arpPlayPtr ,arpPtr);
     if (arpPlayPtr != arpPtr)  //IS there some stuff to play?
     {
-        double latestTime = CACurrentMediaTime();
-        int latestdelay   = arpQueue[ARP_PARAM_TIME][arpPlayPtr];
-        double isitTime   = arpTime + (double)latestdelay/1000.0; //Add ms delay..
-        if (latestTime > isitTime) //Time to play!
+        double latestTime  = CACurrentMediaTime();
+        double latestdelay = arpQueue[ARP_PARAM_TIME][arpPlayPtr];
+        if (latestTime >= latestdelay) //Time to play!
         {
             int a,b,c;
-            a         = arpQueue[ARP_PARAM_NOTE][arpPlayPtr];
-            b         = arpQueue[ARP_PARAM_WNUM][arpPlayPtr];
-            c         = arpQueue[ARP_PARAM_TYPE][arpPlayPtr];
-            _gain      = arpQueue[ARP_PARAM_GAIN][arpPlayPtr];
-            _mono      = arpQueue[ARP_PARAM_MONO][arpPlayPtr];
-            glpan     = arpQueue[ARP_PARAM_LPAN][arpPlayPtr];
-            grpan     = arpQueue[ARP_PARAM_RPAN][arpPlayPtr];
-            //NSLog(@" arp delay %d note %d %d %d at %f lt %f izit %f",latestdelay,a,b,c,arpTime,latestTime,isitTime);
+            a         = (int)arpQueue[ARP_PARAM_NOTE][arpPlayPtr];
+            b         = (int)arpQueue[ARP_PARAM_WNUM][arpPlayPtr];
+            c         = (int)arpQueue[ARP_PARAM_TYPE][arpPlayPtr];
+            _gain     = (float)arpQueue[ARP_PARAM_GAIN][arpPlayPtr];
+            _mono     = (int)arpQueue[ARP_PARAM_MONO][arpPlayPtr];
+            glpan     = (float)arpQueue[ARP_PARAM_LPAN][arpPlayPtr];
+            grpan     = (float)arpQueue[ARP_PARAM_RPAN][arpPlayPtr];
+//            NSLog(@" arp PLAY (%d / %d) [%f / %f] note %d %d %d at %f",
+//                  arpPlayPtr ,arpPtr,  latestTime,latestdelay,
+//                  a,b,c,arpTime);
             [self playNote:a:b:c];
             arpPlayPtr++;
             if (arpPlayPtr >= MAX_ARP) //Wraparound!
@@ -504,10 +533,12 @@ short *audioRecBuffer;
 // this assumes swave has been populated w/ samplefile contents...
 //  (ALSO ASSUME ONLY MONO FOR NOW!!!
 // DHS TGIVING 14: Force stereo samples: makes playback faster
+//  4/29 support 32 bit samples
 - (void)buildSampleTable:(int)which
 {
     int err=0;
-	Float32 cFrame;
+	Float32 clFrame;
+    Float32 crFrame;
 	short ts;
 	int i;
 	if (sBufs[which]) 
@@ -522,32 +553,76 @@ short *audioRecBuffer;
 	sBufs[which] = malloc(totalFrames * sizeof(float)); //DHS 10/6
 	if (!sBufs[which]) return;
     sBufLens[which] = totalFrames;
-    //NSLog(@" ...Buildsample[%d]: frames %d  ",which,totalFrames);
+
+    // 4/29/21 compute bytes per sample if possible
+    int bytesPerSample = 2;
+    if (sNumPackets > 0 && sChans > 0) bytesPerSample = sPacketSize / (sNumPackets*sChans);
+
+    //NSLog(@" ...Buildsample[%d]: frames %d srate %d bps %d",which,totalFrames,lastSampleRate,bytesPerSample);
 
     //DHS 4/12/20 saw overflow by 1 error, reduce loop by 1 to avoid
+    unsigned char *pfileBuffer = (unsigned char*)fileBuffer; //4/29 point to incoming data...
     for ( i = 0; i < sBufLens[which]-1; i+=sChans)  // step through by #channels per packet
 	{	
-        if (i >= swaveSize) 
+        if (i >= fileBufferSize)    //4/29
         {
-            NSLog(@" ...sample overflow: buffer %d index %d maxsize %d",which,i,swaveSize);
+            NSLog(@" ...sample overflow: buffer %d index %d maxsize %d",which,i,fileBufferSize);
             err=1;
             break;   
         }
-        memcpy(&ts,&swave[i],2);  //dest,source,len...
-        cFrame = (float)ts / 32768.0f;
-        sBufs[which][i] = cFrame; //store our data...
-        if (sChans == 1)
-            memcpy(&ts,&swave[i],2);  //dest,source,len...
-        else
-            memcpy(&ts,&swave[i+1],2);  //dest,source,len...
-        cFrame = (float)ts / 32768.0f;
-        sBufs[which][i+1] = cFrame; //store our data...
-        //if (i%128 == 0)
-        //  	NSLog(@" bsw[%d] swave %d ts %d cFrame %f",i,swave[i],ts,cFrame);
+        clFrame = crFrame = 0.0;
+        if (bytesPerSample == 2) //4/29 old 16 bit...
+        {
+            memcpy(&ts,pfileBuffer,2);
+            pfileBuffer+=2; //advance pointer...
+            clFrame = crFrame = (float)ts / 32768.0f;
+            if (sChans == 2)
+            {
+                memcpy(&ts,pfileBuffer,2);
+                pfileBuffer+=2; //advance pointer...
+                crFrame = (float)ts / 32768.0f;
+            }
+        }
+        else if (bytesPerSample == 3) //4/29 new 24 bit...
+        {
+            unsigned int work4 = 0;
+            memcpy(&work4,pfileBuffer,3);
+            pfileBuffer+=3; //advance pointer...
+            work4 = work4 << 8; //padd bottom 8 bits, move sign bit from 24 to 32
+            clFrame = crFrame = (float)((int)work4) / (32768.0*65536.0f);
+            if (sChans == 2)
+            {
+                memcpy(&work4,pfileBuffer,3);
+                pfileBuffer+=3; //advance pointer...
+                work4 = work4 << 8; //padd bottom 8 bits, move sign bit from 24 to 32
+                crFrame = (float)((int)work4) / (32768.0*65536.0f);
+            }
+        }
+        else if (bytesPerSample == 4) //4/29 new 32 bit...
+        {
+            int work4 = 0;
+            memcpy(&work4,pfileBuffer,4);
+            pfileBuffer+=4; //advance pointer...
+            work4 = work4 >> 16; //convert to 16 bit representation
+            clFrame = crFrame = (float)work4 / 32768.0f;
+            if (sChans == 2)
+            {
+                memcpy(&work4,pfileBuffer,4);
+                pfileBuffer+=4; //advance pointer...
+                work4 = work4 >> 16; //convert to 16 bit representation
+                crFrame = (float)work4 / 32768.0f;
+            }
+        }
+        //always store L/R even on mono!!
+        sBufs[which][i]   = clFrame; //store our data...
+        sBufs[which][i+1] = crFrame; //store our data...
+//        if (i%128 == 0 && bytesPerSample == 4)
+//          	NSLog(@" bsw[%d] swave %d ts %d cl/rFrame %f/%f",i,swave[i],ts,clFrame,crFrame);
     }
     //DHS 10/5 WTF? Sample rates seem to vary widely!
-    int properRate = DEFAULT_SAMPLE_RATE;
+    int properRate = lastSampleRate; //4/29
     if (lastSampleRate >= 11000 && lastSampleRate < 12000) properRate = 11025;
+//4/29    if (lastSampleRate == 48000)   properRate = DEFAULT_SAMPLE_RATE;
     sRates[which]   = properRate;
     if (err) sBufLens[which] = 8192; //STOOPID SIZE!
     //NSLog(@"SAMPLE RATES lsr %d rate %d blen %d",lastSampleRate,sRates[which],sBufLens[which]);
@@ -555,10 +630,71 @@ short *audioRecBuffer;
 //     NSLog(@" dump buf every 256th......");
 //     for (int i=0;i<sBufLens[which]-1;i+=256)
 //         NSLog(@" [%d]:%f",i,sBufs[which][i]);
-
-    
 	return;
 } //end buildSampleTable
+
+//------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
+//3/2/21 digital delay
+-(void) initDigitalDelay
+{
+    
+    if (delayBuf != nil) //Really?
+    {
+        NSLog(@" digital delay: reinit? not nil!");
+        free(delayBuf);
+        delayBuf = nil;
+    }
+    
+    //allocate 1 extra second, stereo, 44khz
+    delayBufSize = (1+MAX_DELAY_SECONDS) * DEFAULT_SAMPLE_RATE * 2;
+    delayBuf = malloc(delayBufSize * sizeof(float));
+    if (delayBuf == nil)
+    {
+        NSLog(@" ERROR initializing digital delay!");
+    }
+    drptr = dwptr = 0;
+} //end initDigitalDelay
+
+//------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
+-(void) setDelayVars : (int)dtime : (int)dsustain : (int)dmix
+{
+    delayTime    = dtime; //dtime is in units 0-100, so call it 1/10 sec for now
+    delaySustain = dsustain;
+    delayMix     = dmix;
+    //NOTE we also need to calculate difference between read and write ptrs
+    //  read pointer is usually behind write pointer and never ahead
+    int doffset =  (dtime * 88200) / 100; //stereo
+    drptr = dwptr - doffset;
+    while (drptr < delayBufSize) drptr += delayBufSize; //handle negative wrap...
+}
+
+//------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
+// incoming l/r floating point -1.0 .... 1.0 range audio data
+-(void) delaySend : (float)ml : (float) mr
+{
+    delayBuf[dwptr] += ml;
+    if (delayBuf[dwptr] < -1.0) delayBuf[dwptr] = -1.0;  //clip!!
+    if (delayBuf[dwptr] >  1.0) delayBuf[dwptr] =  1.0;
+    dwptr++;
+    delayBuf[dwptr] += mr;
+    if (delayBuf[dwptr] < -1.0) delayBuf[dwptr] = -1.0;  //clip!!
+    if (delayBuf[dwptr] >  1.0) delayBuf[dwptr] =  1.0;
+    dwptr++;
+    while (dwptr >= delayBufSize) dwptr -= delayBufSize; //handle positive wrap...
+}
+
+//------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
+// 3/2/21 digital delay... Just call this TWICE duh!
+-(float) delayReturnLorRWithAutoIncrement
+{
+    float dw = delayBuf[drptr]; //get LH
+    dw *= delaySustain; //should always get smaller, down to 0
+    delayBuf[drptr] = dw;
+    drptr++;
+    while (drptr >= delayBufSize) drptr -= delayBufSize; //handle positive wrap...
+    return dw;
+} //end delayReturnLorRWithAutoIncrement
+
 
 
 //------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
@@ -864,17 +1000,16 @@ short *audioRecBuffer;
 //   the arpQueue is a circular queue!
 - (void)playNoteWithDelay : (int) midiNote : (int) wnum : (int) type : (int) delayms
 {
-    
-    if (arpPtr == MAX_ARP-1) //Wraparound!
-        arpPtr = 0;
-    arpQueue[ARP_PARAM_NOTE][arpPtr] = midiNote;  //Similar to note queue but with timers...
-    arpQueue[ARP_PARAM_WNUM][arpPtr] = wnum;
-    arpQueue[ARP_PARAM_TYPE][arpPtr] = type;
-    arpQueue[ARP_PARAM_GAIN][arpPtr] = _gain;
-    arpQueue[ARP_PARAM_MONO][arpPtr] = _mono;
-    arpQueue[ARP_PARAM_LPAN][arpPtr] = glpan;
-    arpQueue[ARP_PARAM_RPAN][arpPtr] = grpan;
-    arpQueue[ARP_PARAM_TIME][arpPtr] = delayms;
+    if (arpPtr == MAX_ARP-1) arpPtr = 0; //Wraparound!
+    arpQueue[ARP_PARAM_NOTE][arpPtr] = (double)midiNote;  //Similar to note queue but with timers...
+    arpQueue[ARP_PARAM_WNUM][arpPtr] = (double)wnum;
+    arpQueue[ARP_PARAM_TYPE][arpPtr] = (double)type;
+    arpQueue[ARP_PARAM_GAIN][arpPtr] = (double)_gain;
+    arpQueue[ARP_PARAM_MONO][arpPtr] = (double)_mono;
+    arpQueue[ARP_PARAM_LPAN][arpPtr] = (double)glpan;
+    arpQueue[ARP_PARAM_RPAN][arpPtr] = (double)grpan;
+    double latestTime = CACurrentMediaTime();
+    arpQueue[ARP_PARAM_TIME][arpPtr] = latestTime + (double)delayms*0.001;
     arpPtr++;
 
 } //end playNoteWithDelay
@@ -891,17 +1026,24 @@ short *audioRecBuffer;
 //                       midiNote,
 //                    (float)(sBufLens[wnum]/2)/(float)sRates[wnum],
 //                    type,wnum,sRates[wnum],sBufLens[wnum],detune,masterLevel);
+    
 	if (sBufLens[wnum] <= 0)
     {
         NSLog(@" ERROR: buffer[%d] empty",wnum); //DHS 9/18 diagnostic, delete later    
         return;
     }
     //DHS 11/22 does this work on non-pitch shifted samples???
+    // 4/29 perform fixed pitch shift to compensate for sample rate
     if (sRates[wnum] == 11025)
-    {
-        midiNote -= 24;
-        detune = TRUE; //force detune for weird sample rates
-    }
+        midiNote -= 24; //2 octave shift down
+    else if (sRates[wnum] == 22050)
+        midiNote -= 12; //1 octave shift down
+    else if (sRates[wnum] == 16000) //4/29
+        midiNote -= 21; // 1.75 octave shift down
+    else if (sRates[wnum] == 48000) //4/29
+        midiNote += 1; // one note UP
+    if (sRates[wnum] != DEFAULT_SAMPLE_RATE) detune = TRUE; //anything but 44.1khz we need to detune!
+
     if (midiNote < 1 || midiNote > 255) return;
     //uniqueVoiceCounter++;  //keep track of nth voice...
     if (_mono) //ok mono means find old voice and stop it!
@@ -933,8 +1075,12 @@ short *audioRecBuffer;
         n=foundit;
         tones[n].toneType = type;
         tones[n].state    = STATE_PRESSED;
+        //2/12/21 add fine tuning...  +/- 50 notes
+        midiNote += (pKeyOffset-50);
+        midiNote = MAX(0,MIN(128,midiNote)); //4/26 handle wild notes!!!
         tones[n].midiNote = midiNote;
         tones[n].phase    = 0.0f;
+        //2/12/21 still need to change pitch using pKeyDetune!!!
         tones[n].pitch    = pitches[midiNote];
         //NSLog(@".. note %d ,pitch %f   ",midiNote, pitches[midiNote]);
         [self incrVoiceCount:n];
@@ -947,12 +1093,23 @@ short *audioRecBuffer;
         tones[n].envStep  = 0.0f;
         tones[n].envDelta = midiNote / 64.0f;
         tones[n].waveNum  = wnum;	
-        tones[n].toneType = type;	
-        tones[n].gain	  = _gain * finalMixGain;
+        tones[n].toneType = type;
+        //2/12/21 fine tuning...
+        float pgain = 1.0;
+        if (pLevel < 50) //attenuate level by 2x
+        {
+            pgain = MAX(0.5,0.5 + 0.5 * (float)pLevel/50.0);
+        }
+        else if (pLevel > 50) //increase level by 2x
+        {
+            pgain = MIN(2.0,1.0 + 0.5 * (float)pLevel/50.0);
+        }
+        tones[n].gain	  = _gain * pgain * finalMixGain;
         tones[n].detune	  = detune;
         tones[n].mono 	  = _mono;
         tones[n].lpan     = glpan;	 //see setPan!
-        tones[n].rpan     = grpan;	 //see setPan!	
+        tones[n].rpan     = grpan;	 //see setPan!
+
         tones[n].portamentoTime  = portamentoTime;
         tones[n].timetrax = timetrax;
         tones[n].infinite = 0;
@@ -963,8 +1120,6 @@ short *audioRecBuffer;
             // 9/2 add exponential range to vib ampl / speed
             tones[n].vibAmpl    = (int)powf(1.03,(float)vibAmpl);
             tones[n].vibSpeed   = (int)powf(1.08,(float)vibSpeed);
-//            tones[n].vibAmpl    = vibAmpl;
-//            tones[n].vibSpeed   = vibSpeed;
             tones[n].vibWave    = vibWave;
             tones[n].vibDelay   = vibDelay;
             tones[n].vibIndex   = 0.0;
@@ -972,6 +1127,20 @@ short *audioRecBuffer;
             //NSLog(@" play: viba/w/s/i/s %d %d %d %f",vibAmpl,vibWave,vibSpeed,tones[n].vibStep);
         }
         else tones[n].vibEnabled = FALSE;
+        //4/8 amplitude vibe support
+        if (vibeAmpl > 0 && vibeSpeed > 0) //user enabled vibrato?
+        {
+            tones[n].vibeEnabled = TRUE;
+            // 9/2 add exponential range to vib ampl / speed
+            tones[n].vibeAmpl    = (int)powf(1.03,(float)vibeAmpl);
+            tones[n].vibeSpeed   = (int)powf(1.08,(float)vibeSpeed);
+            tones[n].vibeWave    = vibeWave;
+            tones[n].vibeDelay   = vibeDelay;
+            tones[n].vibeIndex   = 0.0;
+            tones[n].vibeStep    = 0.3*tones[n].vibeSpeed;  //9/2
+            //NSLog(@" play: AMPLvib a/w/s/i/s %d %d %d %f",vibeAmpl,vibeWave,vibeSpeed,tones[n].vibeStep);
+        }
+        else tones[n].vibeEnabled = FALSE;
 
         if (type == SYNTH_VOICE)
         {
@@ -1008,7 +1177,7 @@ short *audioRecBuffer;
             OMSetDevice(midiDev);
             OMPlayNote(midiChan, midiNote, vel );   
         }
-    
+      // [self dumpTone:n];
     }
         
     //if (foundit == -1) NSLog(@" ...ran out of tone space! limit=%d",MAX_TONE_EVENTS);
@@ -1236,14 +1405,16 @@ short *audioRecBuffer;
 	SInt16* p = (SInt16*)buffer;
 	int f,n,a,c,wn;
     int sbc;
-	float sValue,sValue2,ml,mr,b,sl,sr,envValue;
+    float sValue,sValue2,ml,mr,b,sl,sr;
     float vibPitchOff = 0.0;
-    
+    float envValue    = 1.0; //2/26 fix no init warning
+    float vibeAmplLevel = 1.0;
+
 	//double startTime = CACurrentMediaTime();
     sValue = sValue2 = 0.0f; //DHS 7/10/15 Compiler warnings
 	// We are going to render the frames one-by-one. For each frame, we loop
 	// through all of the active ToneEvents and move them forward a single step
-	// in the simulation. We calculate each ToneEvent's individual output and
+	// in the simulation. We alculate each ToneEvent's individual output and
 	// add it to a mix value. Then we write that mix value into the buffer and 
 	// repeat this process for the next frame.
 	for (f = 0; f < frames; ++f)
@@ -1279,6 +1450,12 @@ short *audioRecBuffer;
                 else if (copyingEnvelope != wn) //11/9 don't access envelope on copy!
                 {
                     a = (int)tones[n].envStep;   // integer part
+                    //DHS 3/29/21 KLUGE? saw a krash with both a and c negative!
+//                    if (a < 0)
+//                    {
+//                        NSLog(@" ERROR: negative index in fillBuffers! (should NEVER HAPPEN)");
+//                        a = 0;
+//                    }
                     b = tones[n].envStep - a;  // decimal part
                     c = a + 1;
                     if (c >= envLength[wn])  // don't wrap around
@@ -1293,6 +1470,8 @@ short *audioRecBuffer;
                         envValue = 0.0;
                     }
                     else if (sEnvs[wn] != NULL) //DHS nov 27 add existance check for sEnvs
+                        //4/26 KRASH here, weird: tone[0] played, midiNote is -30 and envStep is -6773761
+                        //  WTF? how can we get negative env step, and why a negative MIDI note?
                         envValue = (1.0f - b)*sEnvs[wn][a] + b*sEnvs[wn][c];
                     else {
                         envValue = 0.0;
@@ -1351,7 +1530,7 @@ short *audioRecBuffer;
 //            if (n == 0 && tones[n].vibEnabled)
 //            {
 //                float percent = vibPitchOff/pitch;
-//                NSLog(@" pitch vs offset %f : %f [%f %%]",pitch,vibPitchOff,percent); //asdf
+//                NSLog(@" pitch vs offset %f : %f [%f %%]",pitch,vibPitchOff,percent);
 //            }
             pitch = tones[n].pitch + vibPitchOff; //Assume default pitch 7/17 add vibrato
 			// Wrap round when we get to the end of the sine look-up table.
@@ -1429,14 +1608,18 @@ short *audioRecBuffer;
                 }
                 // Calculate the final sample value.
                 //  we need to fill Left/Right buffers EVEN with mono samples!
-                sl = sValue * envValue * tones[n].gain  * tones[n].lpan;
+                // 4/8/21 apply vibe amplitude level as needed
+                vibeAmplLevel = (tones[n].vibeEnabled) ? [self getVibeLevel : n] : 1.0;
+                envValue*=vibeAmplLevel; //apply ampl vibe
+                sl = sValue * envValue * tones[n].gain  * tones[n].lpan ;
                 //if (lrvolmod % 256 == 0)
                 //      NSLog(@" sl: %f %f %f %f",sValue,envValue,tones[n].gain,tones[n].lpan);
+
                 sr = 0;
                 if (sbc == 1) //mono...
-                    sr = sValue * envValue * tones[n].gain  * tones[n].rpan;
+                    sr = sValue * envValue * tones[n].gain  * tones[n].rpan ;
                 else if (sbc == 2) //stereo...
-                    sr = sValue2 * envValue * tones[n].gain  * tones[n].rpan;
+                    sr = sValue2 * envValue * tones[n].gain  * tones[n].rpan ;
                 // Add it to the mix.
                 ml += sl;
                 mr += sr;
@@ -1472,6 +1655,10 @@ short *audioRecBuffer;
         }
 	
     } //end insane main loop...
+    
+    //3/15 handle new arpeggiated notes, should run in real time?
+    //[self arpUpdate];
+    
     //DHS 2/5/18 comment out block to silence warning
     //OK at this point we have a valid buffer; recording?
     if (recording)
@@ -1511,7 +1698,8 @@ short *audioRecBuffer;
 {
     int wave = VIBRATO_WAVE_BASE + tones[n].vibWave;
     float findex = tones[n].vibIndex;
-    float sval = sBufs[wave][(int)findex]; // get raw wave value, range -1 to 1
+    float sval   = sBufs[wave][(int)findex]; // get raw wave value, range 0 to 1
+    sval = (2.0 * sval) - 1.0; //4/30 convert to range -1 to 1...
     float fstep  = tones[n].vibStep;
     findex = findex + fstep;
     while (findex >= sBufLens[wave]) findex-=sBufLens[wave]; //wraparound
@@ -1519,6 +1707,25 @@ short *audioRecBuffer;
     sval *= (pitch * vibAmpl * 0.05); //needs to be blown up a lot?
     return sval;
 }
+
+//------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
+// for voice n, compute amplitude vibe level, returns 1.0 for no change
+//  4/30 wups, input wave range 0..1 NOT -1..1!!
+-(float) getVibeLevel : (int) n
+{
+    int wave = VIBRATO_WAVE_BASE + tones[n].vibeWave;
+    float findex = tones[n].vibeIndex;
+    float sval   = sBufs[wave][(int)findex]; // get raw wave value, range 0 to 1
+    float fstep  = tones[n].vibeStep;
+    findex = findex + fstep;
+    while (findex >= sBufLens[wave]) findex-=sBufLens[wave]; //wraparound
+    tones[n].vibeIndex = findex;  //save updaed vib index
+    //NSLog(@"  svalraw %f",sval);
+    sval =  sval * vibeAmpl * 0.01; //rescale to 0.0 ... 1.0 range
+    //NSLog(@" vi %d vampl %d sv %f",(int)findex,vibeAmpl,sval);
+    return sval;
+}
+
 
 //------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
 - (void)setUnique: (int)newUniqueInt 
@@ -1721,12 +1928,19 @@ short *audioRecBuffer;
 }
 
 //7/17 vibrato externals...
-- (void) setVibAmpl:   (int) newVal {vibAmpl = newVal;}
-- (void) setVibWave:   (int) newVal {vibWave = newVal;}
+- (void) setVibAmpl:   (int) newVal {vibAmpl  = newVal;}
+- (void) setVibWave:   (int) newVal {vibWave  = newVal;}
 - (void) setVibSpeed:  (int) newVal {vibSpeed = newVal;}
 - (void) setVibDelay:  (int) newVal {vibDelay = newVal;}
-
-
+//4/8 amplitude vibe
+- (void) setVibeAmpl:   (int) newVal {vibeAmpl  = newVal;}
+- (void) setVibeWave:   (int) newVal {vibeWave  = newVal;}
+- (void) setVibeSpeed:  (int) newVal {vibeSpeed = newVal;}
+- (void) setVibeDelay:  (int) newVal {vibeDelay = newVal;}
+// 2/12/21 fine tuning
+- (void) setPLevel:     (int)newVal  {pLevel       = newVal;}
+- (void) setPKeyOffset: (int)newVal  {pKeyOffset   = newVal;}
+- (void) setPKeyDetune: (int)newVal  {pKeyDetune   = newVal;}
 
 //------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
 // 10/6 new buffer to store note offset for general midi samples
@@ -1817,7 +2031,7 @@ short *audioRecBuffer;
     //    kAudioFileInvalidPacketDependencyError            = 'dep?',        // 0x6465703F, 1684369471
     //    kAudioFileInvalidFileError                        = 'dta?',        // 0x6474613F, 1685348671
 
-    int x = kAudioFileInvalidChunkError;
+    //int x = kAudioFileInvalidChunkError;
     err = AudioFileCreateWithURL( (__bridge CFURLRef)recURL,
                                  kAudioFileCAFType,
                                  &outFormat, 
@@ -1844,6 +2058,76 @@ short *audioRecBuffer;
 
 
 //------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
+// 4/27/21: just like loadSample but returns dictionary w/ header info
+- (NSDictionary*) getSampleHeader:(NSString *)soundFilePath 
+{
+    AudioFileID fileID; //DHS 11/12
+    OSStatus err;
+    int sws;
+    char duhchar[8];
+    UInt32 theSize,outNumBytes,readsize;
+    UInt64 packetCount,bCount,bitRate;
+    NSURL *fileURL = nil;
+    AudioStreamBasicDescription outFormat;
+    UInt32 thePropSize = sizeof(outFormat);
+    fileURL = [[NSURL alloc] initFileURLWithPath: soundFilePath];
+    //NSLog(@" sample file url %@",fileURL);
+    err = AudioFileOpenURL ((__bridge CFURLRef) fileURL, kAudioFileReadPermission,0,&fileID);
+
+    //on mp4 files, (.mov)? getting error 1954115647
+    //Use of unresolved identifier 'NSDataReadingMappedIfSafe'
+    if (err)
+    {
+        NSLog(@"getSampleHeader load err : %x",err);
+        return nil;
+    }
+    // NSLog(@"File ID %d %x",fileID,fileID);
+    // read size and format
+    //Sept 19, 2019 : WTF! New samples 44.1K dont load. only 11025 works!
+    AudioFileGetProperty(fileID, kAudioFilePropertyDataFormat, &thePropSize, &outFormat);
+    lastSampleRate = (int)outFormat.mSampleRate; //DHS 10/5
+    theSize = outFormat.mFormatID;
+    memcpy(duhchar,&theSize,4);
+    
+    err = AudioFileGetProperty(fileID, kAudioFilePropertyBitRate,
+                               &theSize, &bitRate);
+    //NSLog(@" ...samplerate %d vs bitrate %d",lastSampleRate,bitRate);
+    // if (outFormat.mFormatID == kAudioFormatMPEG4AAC)  NSLog(@" ..found mp4 format..");
+    // if (outFormat.mFormatID == kAudioFormatLinearPCM) NSLog(@" ..found linear PCM format..");
+    sChans = outFormat.mChannelsPerFrame;
+    theSize = sizeof(packetCount);
+    err = AudioFileGetProperty(fileID, kAudioFilePropertyAudioDataPacketCount,
+                               &theSize, &packetCount);
+//    NSLog(@"LoadSamle:[%@]duration %4.2f mSampleRate %d packetCount %llu mBytesPerPacket %d chans %d",name,
+//          (float)(packetCount/sChans)/(float)outFormat.mSampleRate,
+//          (int)outFormat.mSampleRate,packetCount,(int)outFormat.mBytesPerPacket,outFormat.mChannelsPerFrame);
+    bCount = 0;
+    theSize = sizeof(bCount);
+    if (!err) err = AudioFileGetProperty(fileID, kAudioFilePropertyAudioDataByteCount,
+                               &theSize, &bCount);
+    sPacketSize = (int)bCount;
+    sNumPackets = (int)packetCount;
+
+    //OK, short data!
+    sws = sNumPackets * sChans * sizeof(short);
+    fileBufferSize = sNumPackets * sChans;    //4/29
+    readsize = sNumPackets * sChans;
+    outNumBytes = -1;
+    sampleSize =outNumBytes; //DHS 10/6 was readsize;
+    //NSLog(@" ...load sample OK, size %d vs outnumbytes %d",readsize,outNumBytes);
+    if (!err)  AudioFileClose(fileID);
+
+    NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
+                       [NSNumber numberWithInt:sChans],@"channels",
+                       [NSNumber numberWithInt:sNumPackets],@"packets",
+                       [NSNumber numberWithInt:lastSampleRate],@"samplerate",
+                       nil];
+    return d;
+    
+} //end getSampleHeader
+
+
+//------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
 // 4/29/13: Add web support?
 // 5/31/13: Add nils to fileid/fileurl, fix possible corruption bug
 - (void)loadSample:(NSString *)name :(NSString *)type
@@ -1857,13 +2141,13 @@ short *audioRecBuffer;
     NSURL *fileURL = nil;
 	AudioStreamBasicDescription outFormat;
 	UInt32 thePropSize = sizeof(outFormat);
-    if (swave == NULL) //ERROR! Swave failed!
+    if (fileBuffer == NULL) //no memory?
     {
-        swaveSize = 0;
-        NSLog(@"loadSample ERROR swave unallocated!");
+        fileBufferSize = 0;     //4/29
+        NSLog(@"loadSample ERROR filebuffer unallocated!");
         return;
     }
-    //NSLog(@" ..sample name %@ type %@",name,type);
+    //NSLog(@" loadSample %@ type %@",name,type);
     if ([type  isEqual: @"WEB"] || [type  isEqual: @"USR"]) //6/22 web or user content?
         {
             if (name == NULL) return;
@@ -1924,11 +2208,16 @@ short *audioRecBuffer;
 	}
 	//OK, short data!
     sws = sNumPackets * sChans * sizeof(short);
-    swaveSize = sNumPackets * sChans;
+    fileBufferSize = sNumPackets * sChans;     //4/29
     readsize = sNumPackets * sChans;
     outNumBytes = -1;
-    if (!err) err = AudioFileReadPacketData(fileID, FALSE, &outNumBytes, NULL, 0, &readsize, swave);
-    sampleSize =outNumBytes; //DHS 10/6 was readsize;
+
+    //4/29/21 handle 32 bit samples...
+    int bytesPerSample = 2;
+    if (sNumPackets > 0 && sChans > 0) bytesPerSample = sPacketSize / (sNumPackets*sChans);
+    // 4/29 read any type of file into fileBuffer
+    if (!err) err = AudioFileReadPacketData(fileID, FALSE, &outNumBytes, NULL, 0, &readsize, fileBuffer);
+    sampleSize =readsize*bytesPerSample; //DHS 4/29 redo yet again
     //NSLog(@" ...load sample OK, size %d vs outnumbytes %d",readsize,outNumBytes);
 	if (!err)  AudioFileClose(fileID);
     gotSample = 1;
@@ -1937,23 +2226,23 @@ short *audioRecBuffer;
 	
 } //end loadSample
 
-static char *FormatError(char *str, OSStatus error)
-{
-    // see if it appears to be a 4-char-code
-    *(UInt32 *)(str + 1) = CFSwapInt32HostToBig(error);
-    if (isprint(str[1]) && isprint(str[2]) && isprint(str[3]) && isprint(str[4])) {
-        str[0] = str[5] = '\'';
-        str[6] = '\0';
-    } else {
-        // no, format it as an integer
-        sprintf(str, "%d", (int)error);
-    }
-    return str;
-}
+//static char *FormatError(char *str, OSStatus error)
+//{
+//    // see if it appears to be a 4-char-code
+//    *(UInt32 *)(str + 1) = CFSwapInt32HostToBig(error);
+//    if (isprint(str[1]) && isprint(str[2]) && isprint(str[3]) && isprint(str[4])) {
+//        str[0] = str[5] = '\'';
+//        str[6] = '\0';
+//    } else {
+//        // no, format it as an integer
+//        sprintf(str, "%d", (int)error);
+//    }
+//    return str;
+//}
 
 
 //------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
-// 9/21 Local load from path...
+// 9/21 Local load from path... NOT USED in oogieCam, needs updating
 - (void)loadSampleFromPath : (NSString *)subFolder : (NSString *)fileName
 {
     AudioFileID fileID; //DHS 11/12
@@ -2007,12 +2296,13 @@ static char *FormatError(char *str, OSStatus error)
     }
     //OK, short data!
     sws = sNumPackets * sChans * sizeof(short);
-    swaveSize = sNumPackets * sChans;
+    fileBufferSize = sNumPackets * sChans;  //4/29
 
+    NSLog(@"..... samplerate %d",lastSampleRate);
     readsize = sNumPackets * sChans;
     outNumBytes = 0; //DHS 10/10 init to avoid warning
     //DHS 10/10 use this call! not ...PacketData
-    if (!err)err = AudioFileReadPackets (fileID,FALSE,&outNumBytes,NULL,0,&readsize,swave);
+    if (!err)err = AudioFileReadPackets (fileID,FALSE,&outNumBytes,NULL,0,&readsize,fileBuffer);
     sampleSize =  readsize;
     if (!err)  AudioFileClose(fileID);
     gotSample = 1;
@@ -2022,7 +2312,7 @@ static char *FormatError(char *str, OSStatus error)
     //    for (int i=0;i<64;i++) NSLog(@" swave[%d] %x",i,swave[i]);
     return;
     
-} //end loadSample
+} //end loadSampleFromPath
 
 
 /*-----------------------------------------------------------*/  
@@ -2125,8 +2415,9 @@ double drand(double lo_range,double hi_range )
         //df = 32767.0 * (df + 0.5);
         sBufs[whichBuffer][i] = (float)df + 0.5;
     }
-    for (int i=0;i<256;i++)
-        NSLog(@" wb[%d] %f -> %f",i,workBuffer[i],sBufs[whichBuffer][i]);
+// 4/26 cleanup
+//    for (int i=0;i<256;i++)
+//        NSLog(@" wb[%d] %f -> %f",i,workBuffer[i],sBufs[whichBuffer][i]);
 
 }
 
@@ -2193,6 +2484,22 @@ double drand(double lo_range,double hi_range )
     //need to stop and save/nosave samplefile
 } //end stopRecording
 
+//------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------
+-(void) dumpTone : (int) which
+{
+    ToneEvent t = tones[which];
+    NSLog(@" Tone Dump %d ============================",which);
+    NSLog(@" midiNote/pitch/phase %d %f %f",t.midiNote,t.pitch,t.phase);
+    NSLog(@" adsr %d %d %d %d needsEnvelope %d",t.envAttack,t.envDecay,t.envSustain,t.envRelease,t.needsEnvelope);
+    NSLog(@" type/wave/mono/detune %d %d %d %d",t.toneType,t.waveNum,t.mono,t.detune);
+    NSLog(@" envStep/Delta/gain/lpan/rpan  %f %f %f %f %f",t.envStep,t.envDelta,t.gain,t.lpan,t.rpan);
+    NSLog(@" port lastNote/Time/PitchFinish/PitchStep %d %f %f %f",
+          t.portamentoLastNote,t.portamentoTime,t.portamentoPitchFinish,t.portamentoPitchStep);
+    NSLog(@" vib ampl/wave/speed/delay  %d %d %d %d",t.vibAmpl,t.vibWave,t.vibSpeed,t.vibDelay );
+    NSLog(@" vib enabled/index/step %d %f %f",t.vibEnabled,t.vibIndex,t.vibStep );
+    NSLog(@" vibe ampl/wave/speed/delay  %d %d %d %d",t.vibeAmpl,t.vibeWave,t.vibeSpeed,t.vibeDelay );
+    NSLog(@" timetrax/portcount/un/infinite %d %d %d %d",t.timetrax,t.portcount,t.un,t.infinite);
+}
 
 //DHS 10/10/19 el dumpo
 //------==(SYNTHDAVE)==---------==(SYNTHDAVE)==---------==(SYNTHDAVE)==------

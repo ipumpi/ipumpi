@@ -1,3 +1,8 @@
+//                   _    __     ______
+//   _ __ ___   __ _(_)_ _\ \   / / ___|
+//  | '_ ` _ \ / _` | | '_ \ \ / / |
+//  | | | | | | (_| | | | | \ V /| |___
+//  |_| |_| |_|\__,_|_|_| |_|\_/  \____|
 //
 //  ViewController.h
 //  pumpie
@@ -11,6 +16,7 @@
 #import <Parse/Parse.h>
 #import "LoginViewController.h"
 #import "NavButtons.h"
+#import "ipumpiTable.h"
 #import "soundFX.h"
 
 #define NNAV_MENU_BUTTON    0
@@ -19,12 +25,16 @@
 #define NNAV_LOGIN_BUTTON   3
 
 
-@interface ViewController : UIViewController <NavButtonsDelegate>
+@interface ViewController : UIViewController <NavButtonsDelegate,ipumpiTableDelegate>
 {
+    UILabel *simLabel;
+    
     NavButtons *nav;
     bleHelper *ble;
 
     int viewWid,viewHit,viewW2,viewH2;
+    
+    ipumpiTable *pt;
 
     NSString *bstatus;
     NSString *pstatus;

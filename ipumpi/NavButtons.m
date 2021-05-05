@@ -167,7 +167,7 @@
         badgeViews[i].backgroundColor = [UIColor yellowColor];
         [buttonViews[i] addSubview:badgeViews[i]];
         badgeViews[i].hidden = TRUE;
-        badgeViews[i].layer.cornerRadius = bsize/2;
+        badgeViews[i].layer.cornerRadius = bsize/8;
         
         //11/21 shrink font to handle XXX triple digit count!
         badgeLabels[i] = [[UILabel alloc] initWithFrame:  fb];

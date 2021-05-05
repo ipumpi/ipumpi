@@ -8,6 +8,9 @@
 
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
+    
+    _hasTopNotch = [self thisDeviceHasTopNotch];
+    NSLog(@" has notch %d",_hasTopNotch);
     // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
     // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
     // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
@@ -45,6 +48,17 @@
     // Use this method to save data, release shared resources, and store enough scene-specific state information
     // to restore the scene back to its current state.
 }
+
+
+//==========MainVC=========================================================================
+- (BOOL)thisDeviceHasTopNotch {
+    if (@available(iOS 11.0, *)) {
+        
+        return self.window.safeAreaInsets.top > 20.0;
+    }
+    return  NO;
+}
+
 
 
 @end

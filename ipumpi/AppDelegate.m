@@ -41,6 +41,12 @@ NSString *hdkSoundFiles[NUM_SFX_SAMPLES] =
     //Start up sfx...
     _sfx = [soundFX sharedInstance];
 
+    // 5/3 pump simulation mode ,  ipad/notch crap
+    _isSimulatingPump = FALSE;
+    _gotIPad          = [self isiPad]; //12/11 we need ipad support
+    
+    psim = [pumpSimulator sharedInstance]; //load up our simulator
+    
     #ifdef USE_SFX
         //Load Audio Sample files...
         _sfx = [soundFX sharedInstance];
@@ -79,6 +85,22 @@ NSString *hdkSoundFiles[NUM_SFX_SAMPLES] =
     // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
     // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
 }
+
+
+//=========ipumpi appDelegate=================================================
+- (BOOL) isiPad
+{
+    static BOOL isIPad = NO;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        isIPad = [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
+    });
+    return isIPad;
+}
+
+
+
+
 
 
 @end

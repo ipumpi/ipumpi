@@ -155,10 +155,10 @@ static void playCallback(
     
     //set the audioSession category.
     //Needs to be Record or PlayAndRecord to use audioRouteOverride:
-    
+    // 4/26 NOTE this generates analyze warning: value stored to success is never read
     success = [session setCategory:AVAudioSessionCategoryAmbient
                              error:&error];
-    
+    // 4/26 NOTE this generates analyze warning: value stored to success is never read
     success = [session setActive:YES error:&error];
     
 

@@ -1,3 +1,8 @@
+//                   _    __     ______
+//   _ __ ___   __ _(_)_ _\ \   / / ___|
+//  | '_ ` _ \ / _` | | '_ \ \ / / |
+//  | | | | | | (_| | | | | \ V /| |___
+//  |_| |_| |_|\__,_|_|_| |_|\_/  \____|
 //
 //  ViewController.m
 //  pumpie
@@ -9,7 +14,16 @@
 //   https://stackoverflow.com/questions/27216003/working-with-bluetooth-in-objective-c
 //
 //  1/21 add navbar
+// dimitrishein@gmail.com
+//   Pumpie2020!
 
+// Schedule format:
+//   MON:04:30DUR60   =  monday 4:30 am for 60 seconds
+//   FRI:13:00DUR180  =  friday 1:00 pm for 3 minutes
+//   ALL:06:00DUR240  =  7 days a week 6 am for 4 minutes
+//  maybe weekday / weekend too?
+
+#import "AppDelegate.h"
 #import "ViewController.h"
 
 @interface ViewController ()
@@ -18,18 +32,24 @@
 
 @implementation ViewController
 
+
+AppDelegate *appDelegate;
+
 //==========MainVC=========================================================================
 -(id)initWithCoder:(NSCoder *)aDecoder
 {
     if ( (self = [super initWithCoder:aDecoder]) )
     {
         // 7/11 moved here
-//        appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+        appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
 
         _sfx         = [soundFX sharedInstance];
 
         ble = [bleHelper sharedInstance];
-
+        
+        pt  = [ipumpiTable sharedInstance]; //5/3 DB handle to ipumpiTable
+        pt.delegate = self;
+        
         bstatus = @"starting bluetooth...";
         pstatus = @"";
 
@@ -39,7 +59,6 @@
         [[NSNotificationCenter defaultCenter]
                          addObserver: self selector:@selector(bleDiscovered:)
                                 name: @"bleDiscovered" object:nil];
-
     }
     return self;
     
@@ -51,12 +70,43 @@
 {
     [super loadView];
     
+    
+    NSLog(@" test 3");
+    [self thisDeviceHasTopNotch];
+
+  //  let mySceneDelegate = self.view.window.windowScene.delegate
+    // have to do this HERE, appdelegate has no direct mainVC handle
+    appDelegate.hasTopNotch = [self thisDeviceHasTopNotch];
+
     CGSize csz   = [UIScreen mainScreen].bounds.size;
     viewWid = (int)csz.width;
     viewHit = (int)csz.height;
     viewW2  = viewWid/2;
     viewH2  = viewHit/2;
+    
+    int xi,yi,xs,ys;
+
+    xi = 0;
+    xs = viewWid;
+    ys = 32;
+    yi = viewHit - 80 - ys;
+    //FUCK TOP NOTCH. cant get it at creat time for some reason
+    if (1 || appDelegate.hasTopNotch) yi-=32; //account for notch / bottom microphone hole
+    simLabel = [[UILabel alloc] initWithFrame:
+                   CGRectMake(xi, yi , xs , ys)];
+    [simLabel setFont:[UIFont fontWithName:@"Helvetica Neue" size: 24.0]];
+    [simLabel setTextColor:[UIColor blackColor]];
+    [simLabel setBackgroundColor:[UIColor clearColor]];
+    [simLabel setText:@"User Mode"];
+    [simLabel setHidden:NO];
+    simLabel.textAlignment = NSTextAlignmentCenter;
+    [[self view] addSubview:simLabel];
+    
     [self addNavBar];
+    
+    NSLog(@" test 4");
+    [self thisDeviceHasTopNotch];
+
 }
 
 
@@ -64,14 +114,29 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    
-    
     if ([PFUser currentUser] != nil && (PFUser.currentUser.objectId != nil)) //Logged in?
         NSLog(@" logged into parse...");
     else
         NSLog(@" NOT logged into parse...");
+    NSLog(@" test2 %f",self.view.window.safeAreaInsets.top);
 
     // Do any additional setup after loading the view.
+}
+
+//==========MainVC=========================================================================
+- (BOOL)thisDeviceHasTopNotch {
+    if (@available(iOS 11.0, *)) {
+        
+    //    NSLog(@"%@", [[NSApplication sharedApplication] mainWindow]);
+        SceneDelegate *sd = self.view.window.windowScene.delegate;
+        BOOL hasTopNotch = sd.hasTopNotch;
+
+        
+        
+        NSLog(@" test %f %d",self.view.window.safeAreaInsets.top,hasTopNotch);
+        return self.view.window.safeAreaInsets.top > 20.0;
+    }
+    return  NO;
 }
 
 
@@ -159,14 +224,24 @@
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Settings",nil)
                                               style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
                                               }]];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"test1",nil)
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"toggle Pump Simulation",nil)
                                               style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+        BOOL dog = [self thisDeviceHasTopNotch];
+                                appDelegate.isSimulatingPump = !appDelegate.isSimulatingPump;
+                                NSLog(@" simulating pump %d",appDelegate.isSimulatingPump );
+                                [self updateView];
                                               }]];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"test2",nil)
                                               style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+        [self test2];
                                               }]];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"test3",nil)
                                               style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+        [self test3];
+                                              }]];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"test4",nil)
+                                              style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+        [self test4];
                                               }]];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",nil)
                                               style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
@@ -283,7 +358,52 @@
 {
     _topLabel.text    = bstatus;
     _bottomLabel.text = pstatus;
+    
+    
+    UIColor *tColor   = [UIColor blackColor];
+    UIColor *bColor   = [UIColor clearColor];
+    NSString *infoStr = @"User Mode";
+    if (appDelegate.isSimulatingPump)
+    {
+        tColor  = [UIColor whiteColor];
+        bColor  = [UIColor redColor];
+        infoStr = @"Pump Simulation";
+    }
+
+    [simLabel setTextColor:tColor];
+    [simLabel setBackgroundColor:bColor];
+    simLabel.text = infoStr;
+} //end updateView
+
+
+-(void) test2
+{
+    NSLog(@" test2: save shit");
+    [pt getNewSerialNumber];
+    pt.name = @"lilpump";
+    pt.planter = @"lilplanter";
+    [pt saveToParse];
+    
 }
+
+-(void) test3
+{
+    NSLog(@" test3: update shit");
+    [pt readFromParse:@"atrium" :nil];
+
+
+}
+
+-(void) test4
+{
+    [pt fillFieldsFromIndex:0]; //get 0th pump
+    NSString *sn = pt.serialNumber;
+//    [pt updateSensorState:sn :@"sensing"];
+//    -(void) updateSensorState : (NSString*) serialNum : (NSString *) newState
+
+
+}
+
 
 
 
@@ -411,5 +531,17 @@
     }
 } //end didSelectNavButton
 
+#pragma mark - ipumpiTableDelegate
+//====<ipumpiTable delegate>=====================================================
+- (void)didSavePumpToParse : (NSString *)serialNum
+{
+    NSLog(@" pt save OK %@",serialNum);
+}
+
+//====<ipumpiTable delegate>=====================================================
+- (void)errorSavingPumpToParse : (NSString *)err
+{
+    NSLog(@" pt error %@",err);
+}
 
 @end
