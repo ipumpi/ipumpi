@@ -45,8 +45,6 @@ NSString *hdkSoundFiles[NUM_SFX_SAMPLES] =
     _isSimulatingPump = FALSE;
     _gotIPad          = [self isiPad]; //12/11 we need ipad support
     
-    psim = [pumpSimulator sharedInstance]; //load up our simulator
-    
     #ifdef USE_SFX
         //Load Audio Sample files...
         _sfx = [soundFX sharedInstance];

@@ -20,20 +20,34 @@
 
 #define EMPTYCOMMAND @"emptycommand"
 
+//Immediate pump start commands, with time limits
+static NSString *PC_START1MIN  = @"START1MIN";
+static NSString *PC_START5MIN  = @"START5MIN";
+static NSString *PC_START10MIN = @"START10MIN";
+
+//Immediate pump stop
+static NSString *PC_STOP  = @"STOP";
+
+//Get sensor reading now
+static NSString *READSENSORS  = @"readsensors";
+//Load up new schedule from pump table
+static NSString *NEWSCHEDULE  = @"newschedule";
+
 @interface ipumpiCommand : NSObject
 {
     NSString *className;
     NSUUID *itemIdentifier;
+    NSString *lastUuid;
 }
 
 @property (nonatomic , strong) NSString* serialNumber;
 @property (nonatomic , strong) NSString* command;
 @property (nonatomic , strong) NSString* uuid;
+@property (nonatomic, assign) BOOL polling;
 
 @property (nonatomic, unsafe_unretained) id <ipumpiCommandDelegate> delegate;
 
-+ (id)sharedInstance;
--(void) readFromParse: (NSString*) group : (NSString*) name;
+-(void) readFromParse ;
 -(void) sendCommandToParse : (NSString*) serialNum : (NSString *) newCommand;
 
 @end

@@ -23,13 +23,14 @@
     UILabel *spLabel;
     int animTick;
     NSTimer *animTimer;
-    int hvsize;
-    int logoSize;
     BOOL spinning;
+    BOOL smallSize;
 }
 @property (nonatomic, assign) int borderWidth;
 @property (nonatomic, strong) UIColor *borderColor;
 @property (nonatomic, strong) NSString *message;
+@property (nonatomic, assign) int hvsize;
+@property (nonatomic, assign) int logoSize;
 
 -(void) start : (NSString *) ms;
 -(void) stop;

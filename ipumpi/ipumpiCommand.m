@@ -16,16 +16,6 @@
 
 @implementation ipumpiCommand
 
-static ipumpiCommand *sharedInstance = nil;
-
-//=============(ipumpiCommand)=====================================================
-// Get the shared instance and create it if necessary.
-+ (ipumpiCommand *)sharedInstance {
-    if (sharedInstance == nil) {
-        sharedInstance = [[super allocWithZone:NULL] init];
-    }
-    return sharedInstance;
-}
 
 //=============(ipumpiCommand)=====================================================
 -(instancetype) init
@@ -36,17 +26,22 @@ static ipumpiCommand *sharedInstance = nil;
         _serialNumber   = EMPTYCOMMAND;
         _command        = EMPTYCOMMAND;
         _uuid           = EMPTYCOMMAND;
+        lastUuid        = EMPTYCOMMAND;
+        _polling        = FALSE;
     }
     return self;
 }
 
 //=============(ipumpiCommand)=====================================================
 // read one Command record for pump
--(void) readFromParse: (NSString*) group : (NSString*) name
+-(void) readFromParse 
 {
+    //NSLog(@" ipumpCommand readfromParse");
     PFQuery *query = [PFQuery queryWithClassName:className];
+    _polling = TRUE;
     [query whereKey:Pipumpi_serialNumber_key equalTo:_serialNumber];
     [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error) {
+        self->_polling = FALSE;
         if (!error) { //Query came back...
             if (objects.count == 0)
             {
@@ -55,7 +50,16 @@ static ipumpiCommand *sharedInstance = nil;
             else{
                 PFObject *pfo = objects[0]; //get first object and pull out Command
                 self->_command = pfo[Pipumpi_command_key];
-                [self.delegate didReadPumpCommandFromParse:self->_uuid:self->_command];
+                NSString *cmdUuid = pfo[Pipumpi_uuid_key];
+                //NSLog(@" got command...");
+                //OPTIONAL: handler for NEW UUID
+                if (![cmdUuid isEqualToString:self->lastUuid]) //New UUID --> new command!
+                {
+                    self->_uuid = cmdUuid;
+                    //NSLog(@" call didReadPumpCommandFromParse del %@",self.delegate);
+                    [self.delegate didReadPumpCommandFromParse:self->_uuid:self->_command];
+                    self->lastUuid = cmdUuid; //save for next time
+                }
             }
             if (objects.count > 1)
             {

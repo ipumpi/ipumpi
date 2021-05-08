@@ -11,16 +11,6 @@
 
 @implementation pumpSimulator
 
-static pumpSimulator *sharedInstance = nil;
-
-//=============(pumpSimulator)=====================================================
-// Get the shared instance and create it if necessary.
-+ (pumpSimulator *)sharedInstance {
-    if (sharedInstance == nil) {
-        sharedInstance = [[super allocWithZone:NULL] init];
-    }
-    return sharedInstance;
-}
 
 //=============(pumpSimulator)=====================================================
 -(instancetype) init
@@ -37,33 +27,67 @@ static pumpSimulator *sharedInstance = nil;
         _lastCommandDate = [NSDate date];
         _lastOnTime      = [NSDate date];
         _lastOffTime     = [NSDate date];
-        isPolling        = FALSE;
-        
-        //DEBUG TEST
-        _serialNumber = @"ipumpi_E324C1F6-DEE2-445A-89C8-9890940E69F3";
-        //we will look at our table repeatedly...
-        pollTimer = [NSTimer scheduledTimerWithTimeInterval:POLLINGINTERVAL target:self selector:@selector(pollTick:)                                                 userInfo:nil repeats:YES];
+        oldUuid          = EMPTYPUMPSIM;
+        //DB hookups
+        icmd = [[ipumpiCommand alloc] init];
+        icmd.delegate = self;
+        ista = [[ipumpiStatus  alloc] init];
+        ista.delegate = self;
+        lastCmdUuid = @"";
+        lastStaUuid = @"";
+        // we have multiple start commmands
+        startCommands = @[PC_START1MIN,PC_START5MIN,PC_START10MIN];
     }
     return self;
 }
 
+//=============(pumpSimulator)=====================================================
+-(pumpSimulator *) copy
+{
+    pumpSimulator *result = [[pumpSimulator alloc] init];
+    result->className        = className;
+    result.name        = _name;
+    result.serialNumber        = _serialNumber;
+    result.pumpState        = _pumpState;
+    result.sensorState        = _sensorState;
+    result.command        = _command;
+    result.commandDate        = _commandDate;
+    result.lastCommandDate        = _lastCommandDate;
+    result.lastOnTime        = _lastOnTime;
+    result.lastOffTime        = _lastOffTime;
+    return result;
+} //end copy
+
 
 //=============(pumpSimulator)=====================================================
-- (void)pollTick:(NSTimer *)ltimer
+-(void) startPolling
 {
-    if (isPolling) return;
+    // we will look at our table repeatedly...
+    commandTimer = [NSTimer scheduledTimerWithTimeInterval:POLLINGINTERVAL target:self selector:@selector(commandTick:)                                                 userInfo:nil repeats:YES];
+}
+//=============(pumpSimulator)=====================================================
+-(void) stopPolling
+{
+    if (commandTimer == nil) return;
+    [commandTimer invalidate];
+}
 
+
+//=============(pumpSimulator)=====================================================
+// get new commands, on return check if we have a NEW command by looking at the uuid
+-(void) getNextCommand
+{
+    icmd.serialNumber = _serialNumber; //send sn down to command...
+    [icmd readFromParse];
+}
+
+//=============(pumpSimulator)=====================================================
+- (void)commandTick:(NSTimer *)ltimer
+{
+    if (icmd.polling) return;
+    //NSLog(@"self %@ cmd sn %@ ",self,_serialNumber);
     if ( [_serialNumber isEqualToString:EMPTYPUMPSIM] ) return; //bail on fail
-    isPolling = TRUE;
-    [self readFromParse];
-    NSLog(@" polling for pump %@",_serialNumber);
-//    if (needLikeUpdates)
-//    {
-//        [self extractUIDsFromPFObjects];
-//        [workActivity loadMyRecentLikesFromParse : fbc.fbid : publicUIDs : privateUIDs : fappDelegate.privateMode];
-//    }
-    
-    
+    [self getNextCommand];
 } //end privateQueryTick
 
 
@@ -84,7 +108,7 @@ static pumpSimulator *sharedInstance = nil;
 
 //=============(pumpSimulator)=====================================================
 //  read one record for this pump. note error if more than one record found!
--(void) readFromParse
+-(void) readPumpRecordFromParse
 {
     PFQuery *query  = [PFQuery queryWithClassName:className];
     //User who created this record
@@ -101,9 +125,6 @@ static pumpSimulator *sharedInstance = nil;
             }
             //we are looking for a command...
             PFObject *pfo = objects[0];
-            self->_command = pfo[Pipumpi_command_key];
-            NSLog(@" ...read command %@",self->_command);
-            [self handleCommand];
 //            [self.delegate didReadPumpsFromParse];
          } //End !error
         else
@@ -111,10 +132,9 @@ static pumpSimulator *sharedInstance = nil;
 //            NSLog(@" ERROR: reading pumps: %@",error.localizedDescription);
 //            [self.delegate errorReadingPumpsFromParse : error.localizedDescription];
         }
-        self->isPolling = FALSE;   //OK to poll again...
     }]; //End findobjects
 
-} //end readFromParse
+} //end readPumpRecordFromParse
 
 //=============(pumpSimulator)=====================================================
 -(void) saveToParse
@@ -151,26 +171,115 @@ static pumpSimulator *sharedInstance = nil;
 }
 
 //=============(pumpSimulator)=====================================================
+// set up vars to simulate a running pump
 -(void) startPump
 {
+    NSLog(@" -------starting pump %@",_serialNumber);
+    _timeLeft = 0;
+    if ([_command isEqualToString:PC_START1MIN])
+        _timeLeft = 60;
+    else if ([_command isEqualToString:PC_START5MIN])
+        _timeLeft = 300;
+    else if ([_command isEqualToString:PC_START10MIN])
+        _timeLeft = 600;
     
-}
+    
+    if (runTimer != nil) [runTimer invalidate];
+    runTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(runTick:)                                                 userInfo:nil repeats:YES];
+    _pumpState = PUMPSTATE_RUNNING; //Just reflect command for now in output state
+    NSDate *rightNow = [NSDate date];
+    _lastOnTime      = rightNow;
+    _lastCommandDate = rightNow;
+    // this is when we will finish
+    _stopTime        = [rightNow dateByAddingTimeInterval:_timeLeft];
 
+    NSDateFormatter *dformatter   =  [[NSDateFormatter alloc] init]; //9/11
+    [dformatter setDateFormat:@"EEEE, MM/d/YYYY h:mm:ssa"];
+    NSString *dstr1 = [dformatter stringFromDate:rightNow];
+    NSString *dstr2 = [dformatter stringFromDate:_stopTime];
+    NSLog(@" start/stop %@ %@",dstr1,dstr2);
+
+    
+
+} // end startPump
 
 //=============(pumpSimulator)=====================================================
+// set up vars to simulate a running pump
 -(void) stopPump
 {
-    
-}
+    NSLog(@" -------stopping pump %@",_serialNumber);
+    if (runTimer != nil) [runTimer invalidate];
+    _timeLeft = 0;
+    _pumpState = PUMPSTATE_STOPPED;
+    NSDate *rightNow = [NSDate date];
+    _lastOffTime     = rightNow;
+    _lastCommandDate = rightNow;
+} //end stopPump
+
+//=============(pumpSimulator)=====================================================
+// ticks off pump run time ...
+- (void)runTick:(NSTimer *)ltimer
+{
+   _timeLeft--;
+   if ( _timeLeft <= 0 || ![_pumpState isEqualToString:PUMPSTATE_RUNNING])
+   {
+       [self stopPump];   //Make sure pump is STOPPED
+   }
+   //NSLog(@" -------[%@] time[%d] %@",self,_timeLeft,_serialNumber );
+
+} //end privateQueryTick
+
 
 //=============(pumpSimulator)=====================================================
 // sets internal vars to reflect command change.
 //  also has to update DB to indicate command was accepted.
 -(void) handleCommand
 {
+    NSString *stopit = PC_STOP; //FIX THIS!
     if ( _command.length < 3 || [_command isEqualToString:EMPTYPUMPSIM] ) return; //bogus command / typo? bail
-    if      ([_command isEqualToString:Cipumpi_command_start]) [self startPump];   //Start pump
-    else if ([_command isEqualToString:Cipumpi_command_stop])  [self stopPump];    //Stop pump
+    if ( [_uuid isEqualToString:oldUuid] ) return; //Dupe? no action
+    if      ([startCommands indexOfObject:_command] != NSNotFound) //valid start commmand
+        [self startPump];
+    else if ([_command isEqualToString:PC_STOP])  [self stopPump];    //Stop pump
+    _lastCommand = _command; //remember command...
+    oldUuid = _uuid; //save uuid tracker
 }
+
+
+#pragma ipumpiCommandDelegate
+//=============<ipumpiCommandDelegate>====================================================
+- (void)didSendPumpCommandToParse : (NSString *)uuid
+{
+    
+}
+
+//=============<ipumpiCommandDelegate>====================================================
+- (void)errorSendingPumpCommandToParse : (NSString *)uuid : (NSString *)err
+{
+    
+}
+
+//=============<ipumpiCommandDelegate>====================================================
+// returned only when command objects sees a NEW command w/ new uuid!
+- (void)didReadPumpCommandFromParse : (NSString *)uuid : (NSString *)Command
+{
+    //pass on to delegateVC...
+    self->_command = Command;
+    self->_uuid    = uuid;
+    [self handleCommand];
+}
+
+//=============<ipumpiCommandDelegate>====================================================
+- (void)errorReadingPumpCommandFromParse : (NSString *)uuid : (NSString *)err
+{
+}
+
+//=============<ipumpiCommandDelegate>====================================================
+- (void)didReadEmptyPumpCommandFromParse
+{
+    
+}
+
+
 
 @end

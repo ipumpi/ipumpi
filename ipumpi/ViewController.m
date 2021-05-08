@@ -22,6 +22,9 @@
 //   FRI:13:00DUR180  =  friday 1:00 pm for 3 minutes
 //   ALL:06:00DUR240  =  7 days a week 6 am for 4 minutes
 //  maybe weekday / weekend too?
+//  For pumpSimVC: make pumps last from session to session?
+//     once that is done then its time for the front end to start/stop pumps
+
 
 #import "AppDelegate.h"
 #import "ViewController.h"
@@ -47,11 +50,30 @@ AppDelegate *appDelegate;
 
         ble = [bleHelper sharedInstance];
         
+        //stubbed serial numvers
+        sns  = [stubSNs sharedInstance];
+
         pt  = [ipumpiTable sharedInstance]; //5/3 DB handle to ipumpiTable
         pt.delegate = self;
         
         bstatus = @"starting bluetooth...";
         pstatus = @"";
+        
+        psvc = [[pumpSimVC alloc] init];
+        psvc.modalPresentationStyle = UIModalPresentationFullScreen;
+
+        
+        NSString *snz = @"";
+        for (int i=0;i<32;i++)
+        {
+            NSUUID *id = [[NSUUID alloc] init];
+            NSString *sn = [NSString stringWithFormat:@"ipumpi_%@",[id UUIDString]];
+            snz = [snz stringByAppendingString:sn];
+            snz = [snz stringByAppendingString:@",\n"];
+        }
+
+        NSLog(@" snz %@",snz);
+        
 
         [[NSNotificationCenter defaultCenter]
                          addObserver: self selector:@selector(bleUpdatedState:)
@@ -231,9 +253,9 @@ AppDelegate *appDelegate;
                                 NSLog(@" simulating pump %d",appDelegate.isSimulatingPump );
                                 [self updateView];
                                               }]];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"test2",nil)
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Create Generic Pumps",nil)
                                               style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-        [self test2];
+        [self createGenericPumpsInDB];
                                               }]];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"test3",nil)
                                               style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
@@ -376,6 +398,23 @@ AppDelegate *appDelegate;
 } //end updateView
 
 
+-(void) createGenericPumpsInDB
+{
+    int numsns = (int)sns.snStrings.count;
+    for (int i = 0;i<numsns;i++)
+    {
+        NSString *snw = sns.snStrings[i];
+        pt.serialNumber = snw;
+        pt.name = [NSString stringWithFormat:@"pump%2.2d",i];
+        pt.planter = @"lilplanter";
+        pt.group = [NSString stringWithFormat:@"group%2.2d",i/5];
+        pt.planter = [NSString stringWithFormat:@"lilplanter %2.2d",i/3];
+        [pt saveToParse];
+
+    }
+} //end createGenericPumpsInDB
+
+
 -(void) test2
 {
     NSLog(@" test2: save shit");
@@ -512,7 +551,9 @@ AppDelegate *appDelegate;
     }
     else if (which == NNAV_BUTTON_1) //b1...
     {
-        NSLog(@" button 1...");
+        NSLog(@" pump sim");
+        [self presentViewController:psvc animated:YES completion:nil];
+
     }
     else if (which == NNAV_BUTTON_2) //b2...
     {

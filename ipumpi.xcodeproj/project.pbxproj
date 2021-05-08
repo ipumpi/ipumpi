@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7207E4392645EDA2008DF76C /* pauseBtn.png in Resources */ = {isa = PBXBuildFile; fileRef = 7207E4372645EDA2008DF76C /* pauseBtn.png */; };
+		7207E43A2645EDA2008DF76C /* continueBtn.png in Resources */ = {isa = PBXBuildFile; fileRef = 7207E4382645EDA2008DF76C /* continueBtn.png */; };
+		7207E43E2645EFEE008DF76C /* stubSNs.m in Sources */ = {isa = PBXBuildFile; fileRef = 7207E43D2645EFEE008DF76C /* stubSNs.m */; };
+		7207E445264723A5008DF76C /* white128x128.png in Resources */ = {isa = PBXBuildFile; fileRef = 7207E444264723A4008DF76C /* white128x128.png */; };
+		720D4CA42644DA8600649A74 /* pumpCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 720D4CA12644DA8600649A74 /* pumpCell.m */; };
+		720D4CA52644DA8600649A74 /* pumpSimVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 720D4CA32644DA8600649A74 /* pumpSimVC.m */; };
 		72112AEB25BADB57008A03AE /* NavButtons.m in Sources */ = {isa = PBXBuildFile; fileRef = 72112AEA25BADB57008A03AE /* NavButtons.m */; };
 		72112AF325BADCF8008A03AE /* burgerNOT.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 72112AF125BADCF8008A03AE /* burgerNOT.jpg */; };
 		72112AF425BADCF8008A03AE /* burgerHOT.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 72112AF225BADCF8008A03AE /* burgerHOT.jpg */; };
@@ -64,6 +70,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7207E4372645EDA2008DF76C /* pauseBtn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pauseBtn.png; sourceTree = "<group>"; };
+		7207E4382645EDA2008DF76C /* continueBtn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = continueBtn.png; sourceTree = "<group>"; };
+		7207E43C2645EFEE008DF76C /* stubSNs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stubSNs.h; sourceTree = "<group>"; };
+		7207E43D2645EFEE008DF76C /* stubSNs.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = stubSNs.m; sourceTree = "<group>"; };
+		7207E444264723A4008DF76C /* white128x128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = white128x128.png; sourceTree = "<group>"; };
+		720D4CA02644DA8600649A74 /* pumpSimVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pumpSimVC.h; sourceTree = "<group>"; };
+		720D4CA12644DA8600649A74 /* pumpCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = pumpCell.m; sourceTree = "<group>"; };
+		720D4CA22644DA8600649A74 /* pumpCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pumpCell.h; sourceTree = "<group>"; };
+		720D4CA32644DA8600649A74 /* pumpSimVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = pumpSimVC.m; sourceTree = "<group>"; };
 		72112AE925BADB57008A03AE /* NavButtons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NavButtons.h; sourceTree = "<group>"; };
 		72112AEA25BADB57008A03AE /* NavButtons.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NavButtons.m; sourceTree = "<group>"; };
 		72112AF125BADCF8008A03AE /* burgerNOT.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = burgerNOT.jpg; sourceTree = "<group>"; };
@@ -125,7 +140,6 @@
 		72B04C092642466100FE4792 /* pumpSimulator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pumpSimulator.h; sourceTree = "<group>"; };
 		72B04C0A2642466100FE4792 /* pumpSimulator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = pumpSimulator.m; sourceTree = "<group>"; };
 		72B04C0E2642482B00FE4792 /* ipumpiKeys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ipumpiKeys.h; sourceTree = "<group>"; };
-		72B04C1226424EEA00FE4792 /* ipumpiCommands.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ipumpiCommands.h; sourceTree = "<group>"; };
 		72B04C14264270F300FE4792 /* ipumpiStatus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ipumpiStatus.h; sourceTree = "<group>"; };
 		72B04C15264270F400FE4792 /* ipumpiStatus.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ipumpiStatus.m; sourceTree = "<group>"; };
 		72B04C1A264279B100FE4792 /* ipumpiCommand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ipumpiCommand.h; sourceTree = "<group>"; };
@@ -200,6 +214,19 @@
 			path = Samples;
 			sourceTree = "<group>";
 		};
+		72143B13264281870021F9DA /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				72112AE925BADB57008A03AE /* NavButtons.h */,
+				72112AEA25BADB57008A03AE /* NavButtons.m */,
+				72810E2025A6538F0051E90E /* spinnerView.h */,
+				72810E2125A6538F0051E90E /* spinnerView.m */,
+				72810E2325A653D40051E90E /* UIImageExtras.h */,
+				72810E2425A653D40051E90E /* UIImageExtras.m */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
 		725A3376256653EF0074092E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -233,6 +260,8 @@
 		72810E2925A654D80051E90E /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				7207E4382645EDA2008DF76C /* continueBtn.png */,
+				7207E4372645EDA2008DF76C /* pauseBtn.png */,
 				72112AF225BADCF8008A03AE /* burgerHOT.jpg */,
 				72112AF125BADCF8008A03AE /* burgerNOT.jpg */,
 				7270298F25A91366008923B3 /* ipumpiRing.png */,
@@ -245,6 +274,7 @@
 				72810E3A25A65F0A0051E90E /* avatar04.png */,
 				72810E3025A65E4A0051E90E /* avatar05.png */,
 				7270298D25A82F5C008923B3 /* test1.png */,
+				7207E444264723A4008DF76C /* white128x128.png */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -280,8 +310,11 @@
 				72F3B26725664E1300562343 /* ViewController.m */,
 				72810E1D25A652EE0051E90E /* LoginViewController.h */,
 				72810E1E25A652EF0051E90E /* LoginViewController.m */,
+				720D4CA22644DA8600649A74 /* pumpCell.h */,
+				720D4CA12644DA8600649A74 /* pumpCell.m */,
+				720D4CA02644DA8600649A74 /* pumpSimVC.h */,
+				720D4CA32644DA8600649A74 /* pumpSimVC.m */,
 				72B04C0E2642482B00FE4792 /* ipumpiKeys.h */,
-				72B04C1226424EEA00FE4792 /* ipumpiCommands.h */,
 				72B04C092642466100FE4792 /* pumpSimulator.h */,
 				72B04C0A2642466100FE4792 /* pumpSimulator.m */,
 				7276C05023BC196D001C4AA0 /* ipumpiTable.h */,
@@ -290,14 +323,11 @@
 				72B04C15264270F400FE4792 /* ipumpiStatus.m */,
 				72B04C1A264279B100FE4792 /* ipumpiCommand.h */,
 				72B04C1B264279B100FE4792 /* ipumpiCommand.m */,
-				72112AE925BADB57008A03AE /* NavButtons.h */,
-				72112AEA25BADB57008A03AE /* NavButtons.m */,
-				72810E2025A6538F0051E90E /* spinnerView.h */,
-				72810E2125A6538F0051E90E /* spinnerView.m */,
+				7207E43C2645EFEE008DF76C /* stubSNs.h */,
+				7207E43D2645EFEE008DF76C /* stubSNs.m */,
+				72143B13264281870021F9DA /* UI */,
 				72F3B27925664E3400562343 /* bleHelper.h */,
 				72F3B27A25664E3400562343 /* bleHelper.m */,
-				72810E2325A653D40051E90E /* UIImageExtras.h */,
-				72810E2425A653D40051E90E /* UIImageExtras.m */,
 				7276C064264075B0001C4AA0 /* Reachability */,
 				72F3B26925664E1300562343 /* Main.storyboard */,
 				72F3B26C25664E1600562343 /* Assets.xcassets */,
@@ -382,11 +412,14 @@
 				72810E2B25A654D80051E90E /* icon128.png in Resources */,
 				7276C06B264075B0001C4AA0 /* README.md in Resources */,
 				72112B1A25BAE724008A03AE /* bigweiner.wav in Resources */,
+				7207E43A2645EDA2008DF76C /* continueBtn.png in Resources */,
+				7207E4392645EDA2008DF76C /* pauseBtn.png in Resources */,
 				72810E3425A65E4B0051E90E /* avatar02.png in Resources */,
 				7270299025A91366008923B3 /* ipumpiRing.png in Resources */,
 				72F3B26B25664E1300562343 /* Main.storyboard in Resources */,
 				72112B1725BAE724008A03AE /* blip.wav in Resources */,
 				72112B1125BAE724008A03AE /* snap44k.wav in Resources */,
+				7207E445264723A5008DF76C /* white128x128.png in Resources */,
 				72810E3B25A65F0B0051E90E /* avatar04.png in Resources */,
 				72112AF425BADCF8008A03AE /* burgerHOT.jpg in Resources */,
 				72112B1425BAE724008A03AE /* karate44k.wav in Resources */,
@@ -404,10 +437,13 @@
 			files = (
 				72112B0225BAE611008A03AE /* SynthDave.m in Sources */,
 				72F3B26825664E1300562343 /* ViewController.m in Sources */,
+				720D4CA52644DA8600649A74 /* pumpSimVC.m in Sources */,
 				72112B0425BAE611008A03AE /* oogieMidiStubs.m in Sources */,
+				7207E43E2645EFEE008DF76C /* stubSNs.m in Sources */,
 				72F3B26225664E1300562343 /* AppDelegate.m in Sources */,
 				7276C069264075B0001C4AA0 /* Reachability.m in Sources */,
 				72810E2225A6538F0051E90E /* spinnerView.m in Sources */,
+				720D4CA42644DA8600649A74 /* pumpCell.m in Sources */,
 				72112AEB25BADB57008A03AE /* NavButtons.m in Sources */,
 				72F3B27B25664E3400562343 /* bleHelper.m in Sources */,
 				72112B0125BAE611008A03AE /* AudioBufferPlayer.m in Sources */,

@@ -13,7 +13,6 @@
 #import "SceneDelegate.h"
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 {
-    pumpSimulator *psim;
 }
 
 @property (nonatomic , assign) BOOL isSimulatingPump;

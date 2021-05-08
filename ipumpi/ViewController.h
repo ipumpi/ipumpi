@@ -17,7 +17,9 @@
 #import "LoginViewController.h"
 #import "NavButtons.h"
 #import "ipumpiTable.h"
+#import "pumpSimVC.h"
 #import "soundFX.h"
+#import "stubSNs.h"
 
 #define NNAV_MENU_BUTTON    0
 #define NNAV_BUTTON_1       1
@@ -31,10 +33,12 @@
     
     NavButtons *nav;
     bleHelper *ble;
-
+    pumpSimVC *psvc;
+    
     int viewWid,viewHit,viewW2,viewH2;
     
     ipumpiTable *pt;
+    stubSNs *sns;
 
     NSString *bstatus;
     NSString *pstatus;

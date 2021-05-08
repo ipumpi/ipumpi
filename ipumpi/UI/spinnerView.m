@@ -30,15 +30,18 @@
     _borderColor  = [UIColor colorWithRed:1 green:1 blue:1 alpha:1];
     _borderWidth  = 0;
     int xi,yi,xs,ys;
-    xs = ys = logoSize;
-    xi = (hvsize - logoSize)/2;
-    yi = (hvsize - logoSize)/2;
+    xs = ys = _logoSize;
+    xi = (_hvsize - _logoSize)/2;
+    yi = (_hvsize - _logoSize)/2;
     NSString *logoName = @"ipumpiRing"; // @"4colorLogo"
     spView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:logoName]];
     [spView setFrame:CGRectMake(xi,yi, xs, ys)];
     [self addSubview : spView];
-    xs = hvsize;
-    ys = 40;
+    xs = _hvsize;
+    if (smallSize)
+        ys = xs/4;
+    else
+        ys = 40;
     yi = (xs - ys)/2;
     spLabel =  [[UILabel alloc] initWithFrame:  CGRectMake(0,yi, xs,ys)];
     spLabel.text = _message;
@@ -48,7 +51,7 @@
     spLabel.backgroundColor = [UIColor blackColor];
     spLabel.alpha = 0.8;
     spLabel.clipsToBounds   = TRUE;
-    spLabel.layer.cornerRadius = 10;
+    spLabel.layer.cornerRadius = ys/4;
 
     [self  addSubview:spLabel];
     self.hidden = TRUE;
@@ -70,9 +73,20 @@
             w = frame.size.height;
             h = frame.size.width;
         }
-        hvsize = 256;
-        logoSize  = 128;
-        cframe = CGRectMake((w-hvsize)/2,(h-hvsize)/2,hvsize,hvsize);
+        //CLUGE to make this fit inside table cells...
+        if (w > 200) //big width implies full screen for now...
+        {
+            _hvsize = 256;
+            _logoSize  = 128;
+            smallSize = FALSE;
+        }
+        else
+        {
+            _hvsize = w;
+            _logoSize  = w*0.8;
+            smallSize = TRUE;
+        }
+        cframe = CGRectMake((w-_hvsize)/2,(h-_hvsize)/2,_hvsize,_hvsize);
         [self baseInit];
     }
     return self;

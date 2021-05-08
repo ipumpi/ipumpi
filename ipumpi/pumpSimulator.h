@@ -8,7 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import <Parse/Parse.h>
-#import "ipumpiCommands.h"
+#import "ipumpiCommand.h"
+#import "ipumpiStatus.h"
 #import "ipumpiKeys.h"
 @protocol pumpSimulatorDelegate;
 
@@ -19,11 +20,21 @@
 #define PUMPSTATE_RUNNING @"psRunning"
 #define PUMPSTATE_ERROR   @"psError"
 
-@interface pumpSimulator : NSObject
+@interface pumpSimulator : NSObject <ipumpiCommandDelegate,ipumpiStatusDelegate>
 {
     NSString *className;
+    NSString *commandClassName;
     NSTimer *pollTimer;
-    BOOL isPolling;
+    NSString *lastCmdUuid;
+    NSString *lastStaUuid;
+    // hooks to the DB
+    ipumpiCommand *icmd;
+    ipumpiStatus  *ista;
+    NSTimer *commandTimer;
+    NSTimer *runTimer;
+    NSString *oldUuid;
+    NSArray* startCommands;
+    NSString *internalSN;
 //    NSUUID *itemIdentifier;
 }
 
@@ -32,20 +43,23 @@
 @property (nonatomic , strong) NSString* pumpState;
 @property (nonatomic , strong) NSString* sensorState;
 @property (nonatomic , strong) NSString* command;
+@property (nonatomic , strong) NSString* uuid;
 @property (nonatomic , strong) NSDate*   commandDate;
 @property (nonatomic , strong) NSString* lastCommand;
 @property (nonatomic , strong) NSDate*   lastCommandDate;
 @property (nonatomic , strong) NSDate*   lastOnTime;
 @property (nonatomic , strong) NSDate*   lastOffTime;
+@property (nonatomic , strong) NSDate*   stopTime;
+
+@property (nonatomic, assign) int timeLeft;
 
 @property (nonatomic, unsafe_unretained) id <pumpSimulatorDelegate> delegate;
 
-+ (id)sharedInstance;
-//-(void) fillFieldsFromIndex: (int) index;
-//-(void) getNewSerialNumber;
-//-(void) readFromParse: (NSString*) group : (NSString*) name;
-//-(void) saveToParse;
-//-(void) updateSensorState : (NSString*) serialNum : (NSString *) newState;
+-(void) getNextCommand : (NSString *)sn;
+-(void) startPolling;
+-(void) stopPolling;
+-(pumpSimulator *) copy;
+
 
 @end
 
@@ -53,5 +67,5 @@
 @protocol pumpSimulatorDelegate <NSObject>
 @required
 @optional
-//pumpSimulatorDelegate@end
+-(void) didReadPumpCommandFromSimulator: (NSString*) sn  : (NSString*) command;
 @end
