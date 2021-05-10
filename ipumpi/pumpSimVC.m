@@ -346,18 +346,18 @@ int pollCount = 0;
 {
 
     selectedRow = [self getCellRow:sender];
-    pumpCell *cell = (pumpCell *)[[sender superview] superview];
+    pumpSimCell *cell = (pumpSimCell *)[[sender superview] superview];
 //    [clickedCell setPlayButtonHidden:TRUE]; //Hide cells play button!
 //    NSString *sname = fileNamesNoNumberSigns[selectedRow];
 
     
 //    //asdf
-//    pumpCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+//    pumpSimCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     [cell.spi start:@"pumping"];
     [cell.playButton setImage:[UIImage imageNamed:@"pauseBtn"] forState:UIControlStateNormal];
 
 
-}   //end dismiss
+}   //end playSelect
 
 
 //======(pumpSimVC)==========================================
@@ -476,10 +476,10 @@ int pollCount = 0;
 {
     static NSString *CellIdentifier = @"Cell";
     int row = (int)indexPath.row;
-    pumpCell *cell = (pumpCell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    pumpSimCell *cell = (pumpSimCell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil)
     {
-        cell = [[pumpCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        cell = [[pumpSimCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
     
     NSArray *keys = pumpDict.allKeys;

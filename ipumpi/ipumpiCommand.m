@@ -73,14 +73,14 @@
 
 //=============(ipumpiCommand)=====================================================
 // saves status to parse...
--(void) sendCommandToParse : (NSString*) serialNum : (NSString *) newCommand
+-(void) sendOLDCommandToParse : (NSString*) serialNum : (NSString *) newCommand
 {
     PFObject *pfo = [PFObject objectWithClassName:className];
     // produce UUID for this record...
     itemIdentifier = [[NSUUID alloc] init];
-    _uuid = [NSString stringWithFormat:@"ipumpistatus_%@",[itemIdentifier UUIDString]];
+    _uuid = [NSString stringWithFormat:@"ipumpicommand_%@",[itemIdentifier UUIDString]];
     // pack up pump properties... NOTE pump S/N must be set up FIRST!!!
-    pfo[Pipumpi_serialNumber_key]  = _serialNumber;
+    pfo[Pipumpi_serialNumber_key]  = serialNum  ;
     pfo[Pipumpi_command_key]       = newCommand;
     pfo[Pipumpi_uuid_key]          = _uuid;
 
@@ -96,6 +96,50 @@
     }]; //End save
 } //end sendCommandToParse
 
+
+//=============(ipumpiCommand)=====================================================
+// Find existing command if any, replace with new command
+-(void) sendCommandToParse : (NSString*) serialNum : (NSString *) newCommand
+{
+    PFQuery *query = [PFQuery queryWithClassName:className];
+    [query whereKey:Pipumpi_serialNumber_key equalTo:serialNum];
+    [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error) {
+        if (!error) { //Query came back...
+            PFObject *pfo;
+            if (objects.count != 0) //must be something there to update...
+            {
+                pfo = objects[0]; //get first object and pull out status
+            }
+            else //nu8thin?
+            {
+                pfo = [PFObject objectWithClassName:self->className];
+                pfo[Pipumpi_serialNumber_key] = serialNum; //only init once!
+            }
+            pfo[Pipumpi_command_key]      = newCommand;
+            self->itemIdentifier = [[NSUUID alloc] init];
+            self-> _uuid = [NSString stringWithFormat:@"ipumpicmd_%@",[self->itemIdentifier UUIDString]];
+            pfo[Pipumpi_uuid_key]   = self->_uuid;
+            // OK save back to table...
+            [pfo saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+                if (succeeded)
+                {
+                    [self.delegate didSendPumpCommandToParse:self->_uuid];
+                }
+                else
+                {
+                    [self.delegate errorSendingPumpCommandToParse:self->_uuid:error.localizedDescription];
+                }
+            }]; //End save
+       
+        //[self saveToParse];  //saveit!
+    } //End !error
+     else
+     {
+         [self.delegate errorSendingPumpCommandToParse:self->_uuid:error.localizedDescription];
+    }
+}]; //End findobjects
+
+} //end sendCommandToParse
 
 
 @end

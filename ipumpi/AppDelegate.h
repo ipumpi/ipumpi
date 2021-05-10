@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <Parse/Parse.h>
 #import "soundFX.h"
-#import "pumpSimulator.h"
+//#import "pumpSimulator.h"
 #import "SceneDelegate.h"
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 {

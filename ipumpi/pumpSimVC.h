@@ -1,9 +1,3 @@
-//                             _         __     ______
-//   ___  __ _ _ __ ___  _ __ | | ___  __\ \   / / ___|
-//  / __|/ _` | '_ ` _ \| '_ \| |/ _ \/ __\ \ / / |
-//  \__ \ (_| | | | | | | |_) | |  __/\__ \\ V /| |___
-//  |___/\__,_|_| |_| |_| .__/|_|\___||___/ \_/  \____|
-//                      |_|
 //
 //  pumpSimVC.h
 //  oogieCam
@@ -14,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
-#import "pumpCell.h"
+#import "pumpSimCell.h"
 #import "pumpSimulator.h"
 #import "soundFX.h"
 #import "stubSNs.h"
@@ -41,10 +35,6 @@
     NSArray *startCommands;
     pumpSimulator *workPump;
     NSMutableDictionary *pumpDict; //Dictionary of pump simulators
-//    NSArray *fileNamesNoNumberSigns; //4/2/21
-//    NSString *docFolderFullPath;
-//    NSIndexPath* selectedIndexPath;
-//    BOOL changed; //7/13
     NSDateFormatter * dformatter;
     int selectedRow;
     NSTimer *pollTimer;

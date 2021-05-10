@@ -36,16 +36,19 @@ static ipumpiStatus *sharedInstance = nil;
         _serialNumber   = EMPTYSTATUS;
         _status         = EMPTYSTATUS;
         _uuid           = EMPTYSTATUS;
+        _secondsLeft    = 0;
     }
     return self;
 }
 
+
 //=============(ipumpiStatus)=====================================================
 // read one status record for pump
--(void) readFromParse: (NSString*) group : (NSString*) name
+-(void) readFromParse  : (NSString*) sn
 {
     PFQuery *query = [PFQuery queryWithClassName:className];
-    [query whereKey:Pipumpi_serialNumber_key equalTo:_serialNumber];
+//    [query whereKey:Pipumpi_serialNumber_key equalTo:_serialNumber];
+    [query whereKey:Pipumpi_serialNumber_key equalTo:sn];
     [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error) {
         if (!error) { //Query came back...
             if (objects.count == 0)
@@ -53,9 +56,10 @@ static ipumpiStatus *sharedInstance = nil;
                 [self.delegate didReadEmptyPumpStatusFromParse];
             }
             else{
-                PFObject *pfo = objects[0]; //get first object and pull out status
-                self->_status = pfo[Pipumpi_status_key];
-                [self.delegate didReadPumpStatusFromParse:self->_uuid:self->_status];
+                PFObject *pfo      = objects[0]; //get first object and pull out status
+                self->_status      = pfo[Pipumpi_status_key];
+                self->_sensorState = pfo[Pipumpi_sensorState_key];
+                [self.delegate didReadPumpStatusFromParse:sn:self->_status:self->_sensorState];
             }
             if (objects.count > 1)
             {
@@ -101,32 +105,45 @@ static ipumpiStatus *sharedInstance = nil;
     [query whereKey:Pipumpi_serialNumber_key equalTo:_serialNumber];
     [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error) {
         if (!error) { //Query came back...
+            PFObject *pfo;
             if (objects.count != 0) //must be something there to update...
             {
-                PFObject *pfo = objects[0]; //get first object and pull out status
-                if (![newStatus isEqualToString:EMPTYSTATUS])  // update status if needed
-                    pfo[Pipumpi_status_key] = newStatus;
-                if (![newSensorState isEqualToString:EMPTYSTATUS])  // update status if needed
-                    pfo[Pipumpi_status_key] = newSensorState;
-                // OK save back to table...
-                [pfo saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
-                    if (succeeded)
-                    {
-                        [self.delegate didUpdatePumpStatusAndSensorState:self->_uuid];
-                    }
-                    else
-                    {
-                        [self.delegate errorUpdatingPumpStatusAndSensorState : self->_uuid : error.localizedDescription];
-                    }
-                }]; //End save
+                pfo = objects[0]; //get first object and pull out status
             }
-            [self saveToParse];  //saveit!
-        } //End !error
-        else
-        {
-            [self.delegate errorUpdatingPumpStatusAndSensorState  : self->_uuid : error.localizedDescription];
-        }
-    }]; //End findobjects
+            else //nu8thin?
+            {
+                pfo = [PFObject objectWithClassName:self->className];
+                pfo[Pipumpi_serialNumber_key] = self->_serialNumber; //only init once!
+                pfo[Pipumpi_status_key]      = EMPTYSTATUS;
+                pfo[Pipumpi_sensorState_key] = EMPTYSTATUS;
+            }
+            if (![newStatus isEqualToString:EMPTYSTATUS])  // update status if needed
+                pfo[Pipumpi_status_key] = newStatus;
+            if (![newSensorState isEqualToString:EMPTYSTATUS])  // update status if needed
+                pfo[Pipumpi_sensorState_key] = newSensorState;
+            NSLog(@"...dump status %@ sensor %@",pfo[Pipumpi_status_key],pfo[Pipumpi_sensorState_key]);
+            self->itemIdentifier = [[NSUUID alloc] init];
+            self-> _uuid = [NSString stringWithFormat:@"ipumpista_%@",[self->itemIdentifier UUIDString]];
+            pfo[Pipumpi_uuid_key]   = self->_uuid;
+            // OK save back to table...
+            [pfo saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+                if (succeeded)
+                {
+                    [self.delegate didUpdatePumpStatusAndSensorState:self->_uuid];
+                }
+                else
+                {
+                    [self.delegate errorUpdatingPumpStatusAndSensorState : self->_uuid : error.localizedDescription];
+                }
+            }]; //End save
+       
+        //[self saveToParse];  //saveit!
+    } //End !error
+     else
+     {
+        [self.delegate errorUpdatingPumpStatusAndSensorState  : self->_uuid : error.localizedDescription];
+    }
+}]; //End findobjects
 
 } //end updateStatusAndSensorState
 

@@ -18,6 +18,7 @@
 #import "NavButtons.h"
 #import "ipumpiTable.h"
 #import "pumpSimVC.h"
+#import "pumpControlVC.h"
 #import "soundFX.h"
 #import "stubSNs.h"
 
@@ -34,7 +35,8 @@
     NavButtons *nav;
     bleHelper *ble;
     pumpSimVC *psvc;
-    
+    pumpControlVC *pcvc;
+
     int viewWid,viewHit,viewW2,viewH2;
     
     ipumpiTable *pt;

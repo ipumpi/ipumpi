@@ -11,7 +11,7 @@
 		7207E43A2645EDA2008DF76C /* continueBtn.png in Resources */ = {isa = PBXBuildFile; fileRef = 7207E4382645EDA2008DF76C /* continueBtn.png */; };
 		7207E43E2645EFEE008DF76C /* stubSNs.m in Sources */ = {isa = PBXBuildFile; fileRef = 7207E43D2645EFEE008DF76C /* stubSNs.m */; };
 		7207E445264723A5008DF76C /* white128x128.png in Resources */ = {isa = PBXBuildFile; fileRef = 7207E444264723A4008DF76C /* white128x128.png */; };
-		720D4CA42644DA8600649A74 /* pumpCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 720D4CA12644DA8600649A74 /* pumpCell.m */; };
+		720D4CA42644DA8600649A74 /* pumpSimCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 720D4CA12644DA8600649A74 /* pumpSimCell.m */; };
 		720D4CA52644DA8600649A74 /* pumpSimVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 720D4CA32644DA8600649A74 /* pumpSimVC.m */; };
 		72112AEB25BADB57008A03AE /* NavButtons.m in Sources */ = {isa = PBXBuildFile; fileRef = 72112AEA25BADB57008A03AE /* NavButtons.m */; };
 		72112AF325BADCF8008A03AE /* burgerNOT.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 72112AF125BADCF8008A03AE /* burgerNOT.jpg */; };
@@ -46,6 +46,8 @@
 		7276C069264075B0001C4AA0 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 7276C065264075B0001C4AA0 /* Reachability.m */; };
 		7276C06A264075B0001C4AA0 /* LICENCE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7276C066264075B0001C4AA0 /* LICENCE.txt */; };
 		7276C06B264075B0001C4AA0 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 7276C067264075B0001C4AA0 /* README.md */; };
+		727D98442647A2E80043AE14 /* pumpControlVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 727D98432647A2E80043AE14 /* pumpControlVC.m */; };
+		727D984C2647B8370043AE14 /* pumpConCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 727D984B2647B8370043AE14 /* pumpConCell.m */; };
 		72810E1F25A652EF0051E90E /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 72810E1E25A652EF0051E90E /* LoginViewController.m */; };
 		72810E2225A6538F0051E90E /* spinnerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 72810E2125A6538F0051E90E /* spinnerView.m */; };
 		72810E2525A653D40051E90E /* UIImageExtras.m in Sources */ = {isa = PBXBuildFile; fileRef = 72810E2425A653D40051E90E /* UIImageExtras.m */; };
@@ -76,8 +78,8 @@
 		7207E43D2645EFEE008DF76C /* stubSNs.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = stubSNs.m; sourceTree = "<group>"; };
 		7207E444264723A4008DF76C /* white128x128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = white128x128.png; sourceTree = "<group>"; };
 		720D4CA02644DA8600649A74 /* pumpSimVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pumpSimVC.h; sourceTree = "<group>"; };
-		720D4CA12644DA8600649A74 /* pumpCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = pumpCell.m; sourceTree = "<group>"; };
-		720D4CA22644DA8600649A74 /* pumpCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pumpCell.h; sourceTree = "<group>"; };
+		720D4CA12644DA8600649A74 /* pumpSimCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = pumpSimCell.m; sourceTree = "<group>"; };
+		720D4CA22644DA8600649A74 /* pumpSimCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pumpSimCell.h; sourceTree = "<group>"; };
 		720D4CA32644DA8600649A74 /* pumpSimVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = pumpSimVC.m; sourceTree = "<group>"; };
 		72112AE925BADB57008A03AE /* NavButtons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NavButtons.h; sourceTree = "<group>"; };
 		72112AEA25BADB57008A03AE /* NavButtons.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NavButtons.m; sourceTree = "<group>"; };
@@ -124,6 +126,10 @@
 		7276C066264075B0001C4AA0 /* LICENCE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENCE.txt; sourceTree = "<group>"; };
 		7276C067264075B0001C4AA0 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7276C068264075B0001C4AA0 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
+		727D98422647A2E80043AE14 /* pumpControlVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pumpControlVC.h; sourceTree = "<group>"; };
+		727D98432647A2E80043AE14 /* pumpControlVC.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = pumpControlVC.m; sourceTree = "<group>"; };
+		727D984A2647B8370043AE14 /* pumpConCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pumpConCell.h; sourceTree = "<group>"; };
+		727D984B2647B8370043AE14 /* pumpConCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = pumpConCell.m; sourceTree = "<group>"; };
 		72810E1D25A652EE0051E90E /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		72810E1E25A652EF0051E90E /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		72810E2025A6538F0051E90E /* spinnerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = spinnerView.h; sourceTree = "<group>"; };
@@ -310,10 +316,14 @@
 				72F3B26725664E1300562343 /* ViewController.m */,
 				72810E1D25A652EE0051E90E /* LoginViewController.h */,
 				72810E1E25A652EF0051E90E /* LoginViewController.m */,
-				720D4CA22644DA8600649A74 /* pumpCell.h */,
-				720D4CA12644DA8600649A74 /* pumpCell.m */,
+				727D98422647A2E80043AE14 /* pumpControlVC.h */,
+				727D98432647A2E80043AE14 /* pumpControlVC.m */,
+				727D984A2647B8370043AE14 /* pumpConCell.h */,
+				727D984B2647B8370043AE14 /* pumpConCell.m */,
 				720D4CA02644DA8600649A74 /* pumpSimVC.h */,
 				720D4CA32644DA8600649A74 /* pumpSimVC.m */,
+				720D4CA22644DA8600649A74 /* pumpSimCell.h */,
+				720D4CA12644DA8600649A74 /* pumpSimCell.m */,
 				72B04C0E2642482B00FE4792 /* ipumpiKeys.h */,
 				72B04C092642466100FE4792 /* pumpSimulator.h */,
 				72B04C0A2642466100FE4792 /* pumpSimulator.m */,
@@ -443,16 +453,18 @@
 				72F3B26225664E1300562343 /* AppDelegate.m in Sources */,
 				7276C069264075B0001C4AA0 /* Reachability.m in Sources */,
 				72810E2225A6538F0051E90E /* spinnerView.m in Sources */,
-				720D4CA42644DA8600649A74 /* pumpCell.m in Sources */,
+				720D4CA42644DA8600649A74 /* pumpSimCell.m in Sources */,
 				72112AEB25BADB57008A03AE /* NavButtons.m in Sources */,
 				72F3B27B25664E3400562343 /* bleHelper.m in Sources */,
 				72112B0125BAE611008A03AE /* AudioBufferPlayer.m in Sources */,
 				72B04C1C264279B100FE4792 /* ipumpiCommand.m in Sources */,
 				72810E2525A653D40051E90E /* UIImageExtras.m in Sources */,
+				727D98442647A2E80043AE14 /* pumpControlVC.m in Sources */,
 				72F3B27325664E1600562343 /* main.m in Sources */,
 				72810E1F25A652EF0051E90E /* LoginViewController.m in Sources */,
 				72B04C0B2642466100FE4792 /* pumpSimulator.m in Sources */,
 				72B04C16264270F400FE4792 /* ipumpiStatus.m in Sources */,
+				727D984C2647B8370043AE14 /* pumpConCell.m in Sources */,
 				7276C05223BC196D001C4AA0 /* ipumpiTable.m in Sources */,
 				72112B0325BAE611008A03AE /* soundFX.m in Sources */,
 				72F3B26525664E1300562343 /* SceneDelegate.m in Sources */,

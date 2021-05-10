@@ -4,8 +4,8 @@
 // 9/11 add creation dates to sampleCell
 // 4/26 add small margin right of play button/indicator
 // 4/30 debug, remove redundant start call at init
-#import "pumpCell.h"
-@implementation pumpCell
+#import "pumpSimCell.h"
+@implementation pumpSimCell
 
 #define SEPARATOR_SIZE 2
 

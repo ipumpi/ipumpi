@@ -33,6 +33,10 @@
         icmd.delegate = self;
         ista = [[ipumpiStatus  alloc] init];
         ista.delegate = self;
+        statusRunning = FALSE;
+        wasPumpRunning = FALSE; //holds pump run state for ONE status iteration
+        statusSubCount = 0;
+        [self startStatus];
         lastCmdUuid = @"";
         lastStaUuid = @"";
         // we have multiple start commmands
@@ -65,12 +69,44 @@
     // we will look at our table repeatedly...
     commandTimer = [NSTimer scheduledTimerWithTimeInterval:POLLINGINTERVAL target:self selector:@selector(commandTick:)                                                 userInfo:nil repeats:YES];
 }
+
 //=============(pumpSimulator)=====================================================
 -(void) stopPolling
 {
     if (commandTimer == nil) return;
     [commandTimer invalidate];
 }
+
+//=============(pumpSimulator)=====================================================
+-(void) startStatus
+{
+    // output status every second?...
+    // maybe not too fast, 1 minute on delivery, right now set to 5-10 seconds
+    statusTimer = [NSTimer scheduledTimerWithTimeInterval:5.0 target:self selector:@selector(statusTick:)                                                 userInfo:nil repeats:YES];
+    statusRunning = TRUE;
+}
+
+//=============(pumpSimulator)=====================================================
+- (void)statusTick:(NSTimer *)ltimer
+{
+    //if (icmd.polling) return;
+    //NSLog(@"simstatusTick "); //,self,_serialNumber);
+    
+    statusSubCount++;
+    //pumping generates status every pass, otherwise only every 20 passes
+    // wasPumpRunning guarantees one fast status report as soon as pump stops
+    if ( [self isPumpRunning] || wasPumpRunning ||             //running / just ended a run? normal rate
+        (![self isPumpRunning] && (statusSubCount%20 == 0))   //not running? 5% status rate now
+        )
+    {
+        NSLog(@"Status Tick:send report... sn is %@",_serialNumber);
+        [self reportStatus];
+        if ( [self isPumpRunning] ) wasPumpRunning = TRUE;
+        else wasPumpRunning = FALSE;
+    }
+} //end statusTick
+
+
 
 
 //=============(pumpSimulator)=====================================================
@@ -88,7 +124,7 @@
     //NSLog(@"self %@ cmd sn %@ ",self,_serialNumber);
     if ( [_serialNumber isEqualToString:EMPTYPUMPSIM] ) return; //bail on fail
     [self getNextCommand];
-} //end privateQueryTick
+} //end commandTick
 
 
 //=============(pumpSimulator)=====================================================
@@ -159,7 +195,7 @@
 //    [pfo saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
 //        if (succeeded)
 //        {
-//            //if (self->debugMode) NSLog(@" ...batch updated[%@]->parse",self->_batchID);
+//            //if (self->debugMode) NSLo g(@" ...batch updated[%@]->parse",self->_batchID);
 //            [self.delegate didSavePumpToParse:self->_serialNumber];
 //        }
 //        else
@@ -198,9 +234,6 @@
     NSString *dstr1 = [dformatter stringFromDate:rightNow];
     NSString *dstr2 = [dformatter stringFromDate:_stopTime];
     NSLog(@" start/stop %@ %@",dstr1,dstr2);
-
-    
-
 } // end startPump
 
 //=============(pumpSimulator)=====================================================
@@ -214,6 +247,8 @@
     NSDate *rightNow = [NSDate date];
     _lastOffTime     = rightNow;
     _lastCommandDate = rightNow;
+    statusRunning = FALSE; //turn off status now
+
 } //end stopPump
 
 //=============(pumpSimulator)=====================================================
@@ -221,7 +256,7 @@
 - (void)runTick:(NSTimer *)ltimer
 {
    _timeLeft--;
-   if ( _timeLeft <= 0 || ![_pumpState isEqualToString:PUMPSTATE_RUNNING])
+   if ( _timeLeft <= 0 && [self isPumpRunning])
    {
        [self stopPump];   //Make sure pump is STOPPED
    }
@@ -231,10 +266,17 @@
 
 
 //=============(pumpSimulator)=====================================================
+-(BOOL) isPumpRunning
+{
+    return ([_pumpState isEqualToString:PUMPSTATE_RUNNING]);
+}
+
+//=============(pumpSimulator)=====================================================
 // sets internal vars to reflect command change.
 //  also has to update DB to indicate command was accepted.
 -(void) handleCommand
 {
+    NSLog(@" handle command %@",_command);
     NSString *stopit = PC_STOP; //FIX THIS!
     if ( _command.length < 3 || [_command isEqualToString:EMPTYPUMPSIM] ) return; //bogus command / typo? bail
     if ( [_uuid isEqualToString:oldUuid] ) return; //Dupe? no action
@@ -245,6 +287,26 @@
     oldUuid = _uuid; //save uuid tracker
 }
 
+//=============(pumpSimulator)=====================================================
+// save sensor / pump state
+// SOMEHOW more than one serial number is getting reported on a run, at STOP time.
+// after a run, pump is stopped, this gets called again but _serialNumber is now "empty" ?Wtf
+-(void) reportStatus
+{
+    if ([_serialNumber isEqualToString:@"empty"])
+    {
+        NSLog(@" ERROR: empty SN in reportStatus");
+        return;
+    }
+    // this should be 1 time only!
+    ista.serialNumber = _serialNumber;
+    ista.status       = _pumpState;
+    if ([_pumpState isEqualToString:PUMPSTATE_STOPPED])
+        NSLog(@" bing!");
+    NSString *ss = [NSString stringWithFormat:@"%d",_timeLeft]; //save time in sensor state for now
+    NSLog(@" %@ report status %@  /  %@  / %@",self,_serialNumber, _pumpState,ss);
+    [ista updateStatusAndSensorState : _serialNumber : _pumpState : ss];
+}
 
 #pragma ipumpiCommandDelegate
 //=============<ipumpiCommandDelegate>====================================================

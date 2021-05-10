@@ -24,7 +24,7 @@
 //  maybe weekday / weekend too?
 //  For pumpSimVC: make pumps last from session to session?
 //     once that is done then its time for the front end to start/stop pumps
-
+//  ALSO! dont forget that the simulators need to update the STATUS table too!!!
 
 #import "AppDelegate.h"
 #import "ViewController.h"
@@ -59,10 +59,14 @@ AppDelegate *appDelegate;
         bstatus = @"starting bluetooth...";
         pstatus = @"";
         
+        //Simulator VC
         psvc = [[pumpSimVC alloc] init];
         psvc.modalPresentationStyle = UIModalPresentationFullScreen;
 
-        
+        //Control VC
+        pcvc = [[pumpControlVC alloc] init];
+        pcvc.modalPresentationStyle = UIModalPresentationFullScreen;
+
         NSString *snz = @"";
         for (int i=0;i<32;i++)
         {
@@ -248,7 +252,7 @@ AppDelegate *appDelegate;
                                               }]];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"toggle Pump Simulation",nil)
                                               style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-        BOOL dog = [self thisDeviceHasTopNotch];
+//        BOOL dog = [self thisDeviceHasTopNotch];
                                 appDelegate.isSimulatingPump = !appDelegate.isSimulatingPump;
                                 NSLog(@" simulating pump %d",appDelegate.isSimulatingPump );
                                 [self updateView];
@@ -436,7 +440,7 @@ AppDelegate *appDelegate;
 -(void) test4
 {
     [pt fillFieldsFromIndex:0]; //get 0th pump
-    NSString *sn = pt.serialNumber;
+//    NSString *sn = pt.serialNumber;
 //    [pt updateSensorState:sn :@"sensing"];
 //    -(void) updateSensorState : (NSString*) serialNum : (NSString *) newState
 
@@ -557,7 +561,8 @@ AppDelegate *appDelegate;
     }
     else if (which == NNAV_BUTTON_2) //b2...
     {
-        NSLog(@" button 2...");
+        NSLog(@" pump control");
+        [self presentViewController:pcvc animated:YES completion:nil];
     }
     else if (which == NNAV_LOGIN_BUTTON) //User login button?
     {

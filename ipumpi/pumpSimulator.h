@@ -30,8 +30,12 @@
     // hooks to the DB
     ipumpiCommand *icmd;
     ipumpiStatus  *ista;
+    BOOL statusRunning;
+    BOOL wasPumpRunning;
     NSTimer *commandTimer;
     NSTimer *runTimer;
+    NSTimer *statusTimer;
+    int statusSubCount;
     NSString *oldUuid;
     NSArray* startCommands;
     NSString *internalSN;
@@ -57,6 +61,7 @@
 
 -(void) getNextCommand : (NSString *)sn;
 -(void) startPolling;
+-(void) startStatus;
 -(void) stopPolling;
 -(pumpSimulator *) copy;
 

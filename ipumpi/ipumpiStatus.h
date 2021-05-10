@@ -30,11 +30,12 @@
 @property (nonatomic , strong) NSString* status;
 @property (nonatomic , strong) NSString* sensorState;
 @property (nonatomic , strong) NSString* uuid;
+@property(nonatomic,assign)   int secondsLeft;  
 
 @property (nonatomic, unsafe_unretained) id <ipumpiStatusDelegate> delegate;
 
 + (id)sharedInstance;
--(void) readFromParse: (NSString*) group : (NSString*) name;
+-(void) readFromParse : (NSString*) sn;
 -(void) saveToParse;
 -(void) updateStatusAndSensorState : (NSString*) serialNum : (NSString *) newStatus : (NSString *) newSensorState;
 
@@ -46,7 +47,7 @@
 @optional
 - (void)didSavePumpStatusToParse : (NSString *)uuid;
 - (void)errorSavingPumpStatusToParse : (NSString *)uuid : (NSString *)err;
-- (void)didReadPumpStatusFromParse : (NSString *)uuid : (NSString *)status;
+- (void)didReadPumpStatusFromParse : (NSString *)sn : (NSString *)status : (NSString *)sensorState;
 - (void)errorReadingPumpStatusFromParse : (NSString *)uuid : (NSString *)err;
 - (void)didReadEmptyPumpStatusFromParse;
 - (void)didUpdatePumpStatusAndSensorState : (NSString *)uuid;
